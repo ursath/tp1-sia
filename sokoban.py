@@ -24,7 +24,7 @@ class SokobanGame(arcade.Window):
         boxes = []
 
         initial_player_position = [0, 0]
-        for row in range(0, len(self.map_data)-1):
+        for row in range(0, len(self.map_data)):
             for col in range(0, len(self.map_data[0])):
                 current_element = self.map_data[row][col]
                 match current_element:
@@ -71,5 +71,5 @@ class SokobanGame(arcade.Window):
 
 if __name__ == "__main__":
     game = SokobanGame("./maps/1.txt")
-    arcade.run()
-#    print(search_algorithm(game, game.current_state, is_goal, get_children))
+#    arcade.run()
+    print(search_algorithm(game, game.current_state, is_goal, get_children))
