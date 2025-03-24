@@ -1,5 +1,6 @@
 import os
 import arcade
+from game_solver import *
 
 SCREEN_TITLE = "Sokoban Game"
 PNG_SIZE = 64
@@ -17,6 +18,28 @@ class SokobanGame(arcade.Window):
     def __init__(self, map_file):
         with open(map_file, "r") as f:
             self.map_data = [list(line.strip()) for line in f.readlines()]
+
+        self.walls = []
+        self.goals = []
+        boxes = []
+
+        initial_player_position = [0, 0]
+        for row in range(0, len(self.map_data)-1):
+            for col in range(0, len(self.map_data[0])):
+                current_element = self.map_data[row][col]
+                match current_element:
+                    case '#': 
+                        self.walls.append([row, col])
+                    case '$':
+                        boxes.append([row, col])
+                    case '@':
+                        initial_player_position = ([row,col])
+                    case '.':
+                        self.goals.append([row, col])
+                    case '*':
+                        self.goals.append([row,  col])
+                        boxes.append([row , col])
+        self.current_state = State(boxes, initial_player_position)
 
         self.num_rows = len(self.map_data)
         self.num_cols = len(self.map_data[0])
@@ -49,3 +72,4 @@ class SokobanGame(arcade.Window):
 if __name__ == "__main__":
     game = SokobanGame("./maps/1.txt")
     arcade.run()
+#    print(search_algorithm(game, game.current_state, is_goal, get_children))
