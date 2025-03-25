@@ -19,8 +19,9 @@ class SokobanGame(arcade.Window):
         with open(map_file, "r") as f:
             self.map_data = [list(line.strip()) for line in f.readlines()]
 
-        self.walls = []
+        self.walls = [] 
         self.goals = []
+        self.valid_box_positions= []
         boxes = []
 
         initial_player_position = [0, 0]
@@ -33,12 +34,12 @@ class SokobanGame(arcade.Window):
                     case '$':
                         boxes.append([row, col])
                     case '@':
-                        initial_player_position = ([row,col])
+                        initial_player_position = [row,col]
                     case '.':
                         self.goals.append([row, col])
-                    case '*':
-                        self.goals.append([row,  col])
-                        boxes.append([row , col])
+                    #case '*':
+                        #self.goals.add((row,  col))
+                        #boxes.append([row , col])
         self.current_state = State(boxes, initial_player_position)
 
         self.num_rows = len(self.map_data)
@@ -70,6 +71,7 @@ class SokobanGame(arcade.Window):
 
 
 if __name__ == "__main__":
-    game = SokobanGame("./maps/1.txt")
+    game = SokobanGame("./maps/3.txt")
+    load_all_playable_positions_for_boxes(game)
 #    arcade.run()
     print(search_algorithm(game, game.current_state, is_goal, get_children))
