@@ -36,7 +36,8 @@ class Greedy:
 
             if current_state.is_goal():
                 answer['execution_time'] = time.time() - answer['execution_time']
-                answer['path'] = self.get_path(current_state)
+                answer['path'] = self.get_path(current_state)[0]
+                answer['directions'] = self.get_path(current_state)[1]
                 answer['explored'] = len(self.explored) 
                 return answer
 
@@ -57,20 +58,25 @@ class Greedy:
                 if new_state not in self.best_heuristic or h_n < self.best_heuristic[new_state]:
                     self.best_heuristic[new_state] = h_n
                     heapq.heappush(self.priority_queue, (h_n, new_state))
-                    self.parent[new_state] = current_state
+                    self.parent[new_state] = (current_state, direction)
 
         print("No path found.")
         return [] 
 
     def get_path(self, state):
         path = []
+        directions = []
+    
         while state in self.parent:
+            parent_state, direction = self.parent[state]
             path.append(state)
-            state = self.parent[state]
+            directions.append(direction)
+            state = parent_state
+    
         path.append(self.initial_state)
         path.reverse()
-
-        return path
+        directions.reverse()
+        return path, directions
     
 
 def load_map(map_file):
@@ -84,6 +90,7 @@ def execute(greedy):
     print(f"Nodes explored: {answer['explored']}")
     print(f"Frontier: {answer['frontier']}")
     print(f"Path length: {len(answer['path'])}")
+    print(f"Directions: {answer['directions']}")
     print("-----")
 
 def main():

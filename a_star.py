@@ -68,7 +68,8 @@ class A_star:
             if current_state.is_goal():
                 answer['explored'] = len(self.explored)
                 answer['execution_time'] = time.time() - answer['execution_time']
-                answer['path'] = self.get_path(current_state)
+                answer['path'] = self.get_path(current_state)[0]
+                answer['directions'] = self.get_path(current_state)[1]
                 answer['g_n'] = g_n 
                 return answer
 
@@ -90,20 +91,25 @@ class A_star:
                         # PlayerDistance or CombinedHeuristic take boxes and player
                         f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player)
                     heapq.heappush(self.priority_queue, (f_n, new_g_n, new_state))
-                    self.parent[new_state] = current_state
+                    self.parent[new_state] = (current_state, direction)
 
         print("No path found.")
         return None, 0  # No path found
-
+    
     def get_path(self, state):
         path = []
+        directions = []
+    
         while state in self.parent:
+            parent_state, direction = self.parent[state]
             path.append(state)
-            state = self.parent[state]
+            directions.append(direction)
+            state = parent_state
+    
         path.append(self.initial_state)
         path.reverse()
-
-        return path
+        directions.reverse()
+        return path, directions
 
 class MapInfo:
     def __init__(self, map):
@@ -125,6 +131,7 @@ def execute(a_star):
     print(f"Frontier: {answer['frontier']}")
     print(f"Path length: {len(answer['path'])}")
     print(f"g_n: {answer['g_n']}")
+    print(f"Directions: {answer['directions']}")
     print("-------")
 
 def main():
