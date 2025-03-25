@@ -1,4 +1,5 @@
 import heapq
+from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic
 
 class State:
     def __init__(self, boxes, player, targets):
@@ -68,7 +69,13 @@ class A_star:
                 new_g_n = g_n + 1
                 if new_state not in self.g_cost_accum or new_g_n < self.g_cost_accum[new_state]:
                     self.g_cost_accum[new_state] = new_g_n
-                    f_n = new_g_n + self.heuristics.get(new_state.boxes)
+
+                    if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
+                        # ManhattanDistance and ManhattanImproved only take boxes
+                        f_n = new_g_n + self.heuristics.get(new_state.boxes)
+                    else:
+                        # PlayerDistance or CombinedHeuristic take boxes and player
+                        f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player)
                     heapq.heappush(self.priority_queue, (f_n, new_g_n, new_state))
                     self.parent[new_state] = current_state
 
@@ -85,15 +92,15 @@ class A_star:
 
         return path
 
-class ManhattanDistance:
-    def __init__(self, targets):
-        self.targets = targets
+# class ManhattanDistance:
+#     def __init__(self, targets):
+#         self.targets = targets
 
-    def get(self, boxes):
-        sum = 0
-        for box in boxes:
-            sum += min(abs(box[0] - target[0]) + abs(box[1] - target[1]) for target in self.targets)
-        return sum
+#     def get(self, boxes):
+#         sum = 0
+#         for box in boxes:
+#             sum += min(abs(box[0] - target[0]) + abs(box[1] - target[1]) for target in self.targets)
+#         return sum
 
 class MapInfo:
     def __init__(self, map):
@@ -110,17 +117,45 @@ def load_map(map_file):
 def main():
     map = MapInfo(load_map("maps/1.txt"))
 
+    manhattan_distance = ManhattanDistance(map.targets)
+    manhattan_improved = ManhattanImproved(map.targets)
+    player_distance = PlayerDistance(map.targets)
+    combined_heuristic = CombinedHeuristic(map.targets)
+
     initial_state = State(map.boxes, map.player, map.targets)
-    heuristics = ManhattanDistance(map.targets)
 
-    a_star = A_star(initial_state, heuristics, map)
-    path, length = a_star.search()
+    a_star_manhattan = A_star(initial_state, manhattan_distance, map)
+    path, length = a_star_manhattan.search()
 
-    print(f"Final Path Length: {length}")
-
+    print(f"Final Path Length - Manhattan Distance: {length}")
     print("Final path found")
     for step, s in enumerate(path):
         print(f"Step {step}: {s}")
+
+    a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
+    path, length = a_star_manhattan_improved.search()
+
+    print(f"Final Path Length - Manhattan Improved: {length}")
+    print("Final path found")
+    for step, s in enumerate(path):
+        print(f"Step {step}: {s}")
+
+    a_star_player_distance = A_star(initial_state, player_distance, map)
+    path, length = a_star_player_distance.search()
+
+    print(f"Final Path Length - Player Distance: {length}")
+    print("Final path found")
+    for step, s in enumerate(path):
+        print(f"Step {step}: {s}")
+
+    a_star_combined = A_star(initial_state, combined_heuristic, map)
+    path, length = a_star_combined.search()
+
+    print(f"Final Path Length - Combined Heuristic: {length}")
+    print("Final path found")
+    for step, s in enumerate(path):
+        print(f"Step {step}: {s}")
+
 
 if __name__ == "__main__":
     main()

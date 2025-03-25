@@ -1,6 +1,5 @@
 from scipy.optimize import linear_sum_assignment
 
-
 class HeuristicBase:
     def __init__(self, goals):
         self.goals = goals
