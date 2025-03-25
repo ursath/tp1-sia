@@ -43,7 +43,7 @@ def search_algorithm(game, initial_state, is_goal, get_children, sorting_criteri
             # 7: Extraer primer nodo de Fr → n
             # bfs -> pop(0) -> saco como una cola
             # dfs -> pop() -> saco como una pila
-            current_node = frontier.pop()
+            current_node = frontier.pop(0)
 
             # 8-10: if n Goal then return solución
             if is_goal(current_node.state, game):
@@ -114,12 +114,12 @@ def get_children(current_node, game):
 
     if (current_node.action != None):
         last_move = str(current_node.action)
-        opposite_move = {"(-1, 0)": [1, 0], "(0, 1)": [0, -1], "(1, 0)": [-1, 0] , "(0, -1)": [0, 1]}
+        opposite_move = {"[-1, 0]": [1, 0], "[0, 1]": [0, -1], "[1, 0]": [-1, 0] , "[0, -1]": [0, 1]}
         undo_last_move = opposite_move[last_move]
         directions.remove(undo_last_move)
      
     for direction in directions:
-        current_position = (starting_point[0] + direction[0], starting_point[1] + direction[1])
+        current_position = [starting_point[0] + direction[0], starting_point[1] + direction[1]]
         if check_limits([starting_point[0] + direction[0], starting_point[1] + direction[1]], game, last_state, direction):
             # chequeo si existe una caja en la posición a la que nos movemos
             new_boxes = last_state.boxes.copy()
@@ -131,9 +131,9 @@ def get_children(current_node, game):
                 boxed_moved = True
                 new_boxes.remove(current_position)
                 new_boxes.append(box)
-                new_state = State(new_boxes, current_position, game.goals)
+                new_state = State(new_boxes, current_position)
             else:
-                new_state = State(new_boxes, current_position, game.goals)
+                new_state = State(new_boxes, current_position)
 
             result.append([direction, new_state, 0, boxed_moved, current_node.depth + 1])
             # for greedy -> result.append([direction, new_state, calculate_cost(last_state, game)])
@@ -175,16 +175,23 @@ def load_all_playable_positions_for_boxes(game):
         initial_node = Node(State([goal], goal, game.goals))
         directions= [[-1, 0], [0, 1], [1, 0], [0, -1]]
         frontier = []
+        explored = []
         frontier.append(initial_node)
+        explored.append(initial_node.state.boxes[0])
         
         while frontier:
-            current_node = frontier.pop()
+            current_node = frontier.pop(0)
             starting_point = current_node.state.player
             valid_box_positions.append(current_node.state.boxes[0])
 
             for direction in directions:
                 current_box_position = [starting_point[0] + direction[0], starting_point[1] + direction[1]]
                 current_player_position = [current_box_position[0] + direction[0], current_box_position[1] + direction[1]]
+
+                if current_box_position in explored:
+                    continue
+                explored.append(current_box_position)
+
                 if current_player_position not in game.walls:
                     new_state = State([current_box_position], current_player_position, game.goals)
 
