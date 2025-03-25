@@ -1,7 +1,13 @@
-class State:
+class Uninformed_State:
     def __init__(self, boxes, player, move = None):
         self.boxes = boxes
         self.player = player
+    def __eq__(self, other):
+        return self.boxes == other.boxes and self.player == other.player
+    def __hash__(self):
+        return hash((tuple(tuple(box) for box in self.boxes), 
+                     tuple(self.player)))
+
 class Node:
     def __init__(self, state, parent=None, action=None, cost=0, boxed_moved=False, depth = 0):
         self.state = state
@@ -23,18 +29,18 @@ class Node:
             current_node= current_node.parent
         return list(reversed(path))  
 
-def search_algorithm(game, initial_state, is_goal, get_children, sorting_criteria=None):
+def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sorting_criteria=None, method="bfs"):
     # 4: Crear Tr, Fr, Exp vacíos
     # Tr se representa implícitamente mediante los enlaces padre en los nodos
     frontier = []  # Fr
-    explored = set()  # Exp
+    explored = []  # Exp
     
     # 5: Insertar nodo inicial n0 → Tr, Fr
     initial_node = Node(initial_state)
     frontier.append(initial_node)
     
     # for debugging purposes we write to a file
-    #iteration = 0
+    iteration = 0
     depth = 0
     with open('nodes_explored.txt', 'w') as file:
         # 6: while Fr ≠ ∅ do
@@ -43,7 +49,10 @@ def search_algorithm(game, initial_state, is_goal, get_children, sorting_criteri
             # 7: Extraer primer nodo de Fr → n
             # bfs -> pop(0) -> saco como una cola
             # dfs -> pop() -> saco como una pila
-            current_node = frontier.pop(0)
+            if (method == "bfs"):
+                current_node = frontier.pop(0)
+            else:
+                current_node = frontier.pop()
 
             # 8-10: if n Goal then return solución
             if is_goal(current_node.state, game):
@@ -56,25 +65,25 @@ def search_algorithm(game, initial_state, is_goal, get_children, sorting_criteri
             #iteration = iteration + 1
             #action_str = {"[-1, 0]": "u", "[-1, 0]P": "U", "[0, 1]": "r", "[0, 1]P": "R", "[1, 0]": "d", "[1, 0]P": "D" , "[0, -1]": "l", "[0, -1]P": "L"}
 
-            #   move = str(current_node.action)
-            #   if (current_node.boxed_moved):
-            #       move = move + 'P'
+            #move = str(current_node.action)
+            #if (current_node.boxed_moved):
+            #    move = move + 'P'
 
             #if (iteration > 1):
             #    line = (f"{current_node.depth}-{action_str[move]} ")
             #    file.write(line)
 
             # 14: n → Exp
-            explored.add(current_node.state)
+            explored.append(current_node.state)
 
             # check deadlocks
-            if check_deadlocks(current_node.state, game):
-                print("hubo un deadlock pibe 0_0")
-                continue
+            # if check_deadlocks(current_node.state, game):
+            #     continue
 
             # 11-13: Expandir el nodo n, sucesores → Fr, Tr
             for move, child_state, cost, boxed_moved, depth in get_children(current_node, game):
                 # Verificar si el estado ya fue explorado
+
                 if child_state in explored:
                     continue
 
@@ -131,9 +140,9 @@ def get_children(current_node, game):
                 boxed_moved = True
                 new_boxes.remove(current_position)
                 new_boxes.append(box)
-                new_state = State(new_boxes, current_position)
+                new_state = Uninformed_State(new_boxes, current_position)
             else:
-                new_state = State(new_boxes, current_position)
+                new_state = Uninformed_State(new_boxes, current_position)
 
             result.append([direction, new_state, 0, boxed_moved, current_node.depth + 1])
             # for greedy -> result.append([direction, new_state, calculate_cost(last_state, game)])
@@ -168,41 +177,67 @@ def is_blocked_box_for_direction(coordinates, last_state, direction):
 def calculate_cost(state, game):
     return 0
 
-#called before search_algorithm, the result is saved in game.valid_box_positions
 def load_all_playable_positions_for_boxes(game):
     valid_box_positions = []
+    
+    # Iterate through each goal square
     for goal in game.goals:
-        initial_node = Node(State([goal], goal, game.goals))
-        directions= [[-1, 0], [0, 1], [1, 0], [0, -1]]
-        frontier = []
+        # Create a set to track explored positions during pulling
         explored = []
-        frontier.append(initial_node)
-        explored.append(initial_node.state.boxes[0])
+        frontier = [goal]
+        explored.append(goal)
         
+        # Directions for pulling (opposite of pushing)
+        directions = [
+            [1, 0],   # Down to Up
+            [-1, 0],  # Up to Down
+            [0, 1],   # Right to Left
+            [0, -1]   # Left to Right
+        ]
+        
+        # Breadth-first search to pull the box
         while frontier:
-            current_node = frontier.pop(0)
-            starting_point = current_node.state.player
-            valid_box_positions.append(current_node.state.boxes[0])
-
+            current_position = frontier.pop(0)
+            
+            # Try pulling from each direction
             for direction in directions:
-                current_box_position = [starting_point[0] + direction[0], starting_point[1] + direction[1]]
-                current_player_position = [current_box_position[0] + direction[0], current_box_position[1] + direction[1]]
-
-                if current_box_position in explored:
-                    continue
-                explored.append(current_box_position)
-
-                if current_player_position not in game.walls:
-                    new_state = State([current_box_position], current_player_position, game.goals)
-
-                    frontier.append(Node(new_state))
-
+                # Calculate the box position before pulling
+                box_position = [
+                    current_position[0] - direction[0], 
+                    current_position[1] - direction[1]
+                ]
+                
+                # Calculate the player position that would allow this pull
+                player_position = [
+                    box_position[0] - direction[0], 
+                    box_position[1] - direction[1]
+                ]
+                
+                # Check if the pull is valid:
+                # 1. Box position is not a wall
+                # 2. Player position is not a wall
+                # 3. Box position hasn't been explored before
+                if (box_position not in game.walls and 
+                    player_position not in game.walls and 
+                    box_position not in explored):
+                    
+                    # Mark this position as explored and add to frontier
+                    explored.append(box_position)
+                    frontier.append(box_position)
+        
+        # Add all explored positions to valid box positions
+        for pos in explored:
+            if pos not in valid_box_positions:
+                valid_box_positions.append(pos)
+    
+    # Store in game's attribute
     game.valid_box_positions = valid_box_positions
+    
+    return game.valid_box_positions
 
 def check_simple_deadlock_for_boxes(boxes, game):
     for box in boxes:
         if box not in game.valid_box_positions:
-            print("hubo simple deadlock")
             return True
     return False
 
@@ -247,4 +282,5 @@ def check_box_freezed(box, state, game):
     return is_freezed_horizontally and is_freezed_vertically
 
 def check_deadlocks(state, game):
+    print(state.boxes)
     return check_simple_deadlock_for_boxes(state.boxes, game) or check_freeze_deadlock(state, game)

@@ -40,7 +40,7 @@ class SokobanGame(arcade.Window):
                     #case '*':
                         #self.goals.add((row,  col))
                         #boxes.append([row , col])
-        self.current_state = State(boxes, initial_player_position)
+        self.current_state = Uninformed_State(boxes, initial_player_position)
 
         self.num_rows = len(self.map_data)
         self.num_cols = len(self.map_data[0])
@@ -74,4 +74,4 @@ if __name__ == "__main__":
     game = SokobanGame("./maps/3.txt")
     load_all_playable_positions_for_boxes(game)
 #    arcade.run()
-    print(search_algorithm(game, game.current_state, is_goal, get_children))
+    print(uninformed_search_algorithm(game, game.current_state, is_goal, get_children, None, "dfs"))
