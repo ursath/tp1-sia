@@ -12,12 +12,21 @@ class Greedy:
         self.priority_queue = []
         self.parent = {}
         self.map = map
+        self.best_heuristic = {}
 
     def search(self):
-        heapq.heappush(self.priority_queue, (0, self.initial_state))  # (h(n), state)
+        if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
+            # ManhattanDistance and ManhattanImproved only take boxes
+            h_n = self.heuristics.get(self.initial_state.boxes)
+        else:
+            # PlayerDistance or CombinedHeuristic take boxes and player
+            h_n = self.heuristics.get(self.initial_state.boxes, self.initial_state.player)
+
+        heapq.heappush(self.priority_queue, (h_n, self.initial_state))  # (h(n), state)
+        self.best_heuristic[self.initial_state] = h_n
 
         while self.priority_queue:
-            h_n, current_state = heapq.heappop(self.priority_queue)
+            current_h_n, current_state = heapq.heappop(self.priority_queue)
 
             if current_state.is_goal():
                 return self.get_path(current_state)
@@ -35,11 +44,14 @@ class Greedy:
                 else:
                     # PlayerDistance or CombinedHeuristic take boxes and player
                     h_n = self.heuristics.get(new_state.boxes, new_state.player)
-                heapq.heappush(self.priority_queue, (h_n, new_state))
-                self.parent[new_state] = current_state
+
+                if new_state not in self.best_heuristic or h_n < self.best_heuristic[new_state]:
+                    self.best_heuristic[new_state] = h_n
+                    heapq.heappush(self.priority_queue, (h_n, new_state))
+                    self.parent[new_state] = current_state
 
         print("No path found.")
-        return None, 0  # No path found
+        return [] 
 
     def get_path(self, state):
         path = []
