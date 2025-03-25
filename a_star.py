@@ -116,7 +116,7 @@ def execute(a_star):
     print(f"Final Path Length: {length}")
 
 def main():
-    map = MapInfo(load_map("maps/1.txt"))
+    map = MapInfo(load_map("maps/2.txt"))
 
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
