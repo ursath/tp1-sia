@@ -53,13 +53,24 @@ class A_star:
         self.map = map
 
     def search(self):
+
+        answer = {}
+
+        answer['frontier'] = 0
+        answer['execution_time'] = time.time() # To substract from the end time
+
         heapq.heappush(self.priority_queue, (0, 0, self.initial_state))  # (f(n), g(n), state)
 
         while self.priority_queue:
+            answer['frontier'] += len(self.priority_queue)
             f_n, g_n, current_state = heapq.heappop(self.priority_queue)
 
             if current_state.is_goal():
-                return self.get_path(current_state), g_n
+                answer['explored'] = len(self.explored)
+                answer['execution_time'] = time.time() - answer['execution_time']
+                answer['path'] = self.get_path(current_state)
+                answer['g_n'] = g_n 
+                return answer
 
             self.explored.add(current_state)
 
@@ -107,13 +118,14 @@ def load_map(map_file):
         return [list(line.strip()) for line in f.readlines()]
     
 def execute(a_star):
-    start_time = time.time()
-    path, length = a_star.search()
-    end_time = time.time()
+    answer = a_star.search()
 
-    print(f"Heuristic: {a_star.heuristics.__class__.__name__}")
-    print(f"Execution Time: {end_time - start_time:.6f} seconds")
-    print(f"Final Path Length: {length}")
+    print(f"Execution time: {answer['execution_time']}")
+    print(f"Nodes explored: {answer['explored']}")
+    print(f"Frontier: {answer['frontier']}")
+    print(f"Path length: {len(answer['path'])}")
+    print(f"g_n: {answer['g_n']}")
+    print("-------")
 
 def main():
     map = MapInfo(load_map("maps/2.txt"))

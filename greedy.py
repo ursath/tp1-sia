@@ -15,6 +15,11 @@ class Greedy:
         self.best_heuristic = {}
 
     def search(self):
+
+        answer = {}
+        answer['execution_time'] = time.time()  # To substract from the end time
+        answer['frontier'] = 0
+
         if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
             # ManhattanDistance and ManhattanImproved only take boxes
             h_n = self.heuristics.get(self.initial_state.boxes)
@@ -26,10 +31,14 @@ class Greedy:
         self.best_heuristic[self.initial_state] = h_n
 
         while self.priority_queue:
+            answer['frontier'] += len(self.priority_queue)
             current_h_n, current_state = heapq.heappop(self.priority_queue)
 
             if current_state.is_goal():
-                return self.get_path(current_state)
+                answer['execution_time'] = time.time() - answer['execution_time']
+                answer['path'] = self.get_path(current_state)
+                answer['explored'] = len(self.explored) 
+                return answer
 
             self.explored.add(current_state)
 
@@ -69,13 +78,13 @@ def load_map(map_file):
         return [list(line.strip()) for line in f.readlines()]
     
 def execute(greedy):
-    start_time = time.time()
-    path = greedy.search()
-    end_time = time.time()
+    answer = greedy.search()
 
-    print(f"Heuristic: {greedy.heuristics.__class__.__name__}")
-    print(f"Execution Time: {end_time - start_time:.6f} seconds")
-    print(f"Path Length: {len(path)}")
+    print(f"Execution time: {answer['execution_time']}")
+    print(f"Nodes explored: {answer['explored']}")
+    print(f"Frontier: {answer['frontier']}")
+    print(f"Path length: {len(answer['path'])}")
+    print("-----")
 
 def main():
     map = MapInfo(load_map("maps/2.txt"))
