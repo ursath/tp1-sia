@@ -1,5 +1,7 @@
 import heapq
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic
+import time
+
 
 class State:
     def __init__(self, boxes, player, targets):
@@ -51,13 +53,24 @@ class A_star:
         self.map = map
 
     def search(self):
+
+        answer = {}
+
+        answer['frontier'] = 0
+        answer['execution_time'] = time.time() # To substract from the end time
+
         heapq.heappush(self.priority_queue, (0, 0, self.initial_state))  # (f(n), g(n), state)
 
         while self.priority_queue:
+            answer['frontier'] += len(self.priority_queue)
             f_n, g_n, current_state = heapq.heappop(self.priority_queue)
 
             if current_state.is_goal():
-                return self.get_path(current_state), g_n
+                answer['explored'] = len(self.explored)
+                answer['execution_time'] = time.time() - answer['execution_time']
+                answer['path'] = self.get_path(current_state)
+                answer['g_n'] = g_n 
+                return answer
 
             self.explored.add(current_state)
 
@@ -92,16 +105,6 @@ class A_star:
 
         return path
 
-# class ManhattanDistance:
-#     def __init__(self, targets):
-#         self.targets = targets
-
-#     def get(self, boxes):
-#         sum = 0
-#         for box in boxes:
-#             sum += min(abs(box[0] - target[0]) + abs(box[1] - target[1]) for target in self.targets)
-#         return sum
-
 class MapInfo:
     def __init__(self, map):
         self.map = map
@@ -113,9 +116,19 @@ class MapInfo:
 def load_map(map_file):
     with open(map_file, "r") as f:
         return [list(line.strip()) for line in f.readlines()]
+    
+def execute(a_star):
+    answer = a_star.search()
+
+    print(f"Execution time: {answer['execution_time']}")
+    print(f"Nodes explored: {answer['explored']}")
+    print(f"Frontier: {answer['frontier']}")
+    print(f"Path length: {len(answer['path'])}")
+    print(f"g_n: {answer['g_n']}")
+    print("-------")
 
 def main():
-    map = MapInfo(load_map("maps/1.txt"))
+    map = MapInfo(load_map("maps/2.txt"))
 
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
@@ -125,36 +138,16 @@ def main():
     initial_state = State(map.boxes, map.player, map.targets)
 
     a_star_manhattan = A_star(initial_state, manhattan_distance, map)
-    path, length = a_star_manhattan.search()
-
-    print(f"Final Path Length - Manhattan Distance: {length}")
-    print("Final path found")
-    for step, s in enumerate(path):
-        print(f"Step {step}: {s}")
+    execute(a_star_manhattan)
 
     a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
-    path, length = a_star_manhattan_improved.search()
-
-    print(f"Final Path Length - Manhattan Improved: {length}")
-    print("Final path found")
-    for step, s in enumerate(path):
-        print(f"Step {step}: {s}")
-
+    execute(a_star_manhattan_improved)
+   
     a_star_player_distance = A_star(initial_state, player_distance, map)
-    path, length = a_star_player_distance.search()
-
-    print(f"Final Path Length - Player Distance: {length}")
-    print("Final path found")
-    for step, s in enumerate(path):
-        print(f"Step {step}: {s}")
+    execute(a_star_player_distance)
 
     a_star_combined = A_star(initial_state, combined_heuristic, map)
-    path, length = a_star_combined.search()
-
-    print(f"Final Path Length - Combined Heuristic: {length}")
-    print("Final path found")
-    for step, s in enumerate(path):
-        print(f"Step {step}: {s}")
+    execute(a_star_combined)
 
 
 if __name__ == "__main__":

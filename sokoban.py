@@ -9,13 +9,13 @@ ELEMENTS = {
     "#": "./textures/wall.png",   # Pared
     " ": "./textures/free.png",   # Espacio libre (null)
     ".": "./textures/goal.png",   # Objetivo
-    "@": "./textures/player.png", # Jugador
+    "@": "./textures/player.png", # Posicion inicial del jugador
     "$": "./textures/box.png",    # Caja
     "*": "./textures/box_goal.png" # Caja sobre objetivo
 }
 
 class SokobanGame(arcade.Window):
-    def __init__(self, map_file):
+    def __init__(self, map_file, moves):
         with open(map_file, "r") as f:
             self.map_data = [list(line.strip()) for line in f.readlines()]
 
@@ -24,7 +24,10 @@ class SokobanGame(arcade.Window):
         self.valid_box_positions= []
         boxes = []
 
-        initial_player_position = [0, 0]
+        self.moves = moves  
+        self.current_move_index = 0  
+
+        self.player_position = [0, 0]
         for row in range(0, len(self.map_data)):
             for col in range(0, len(self.map_data[0])):
                 current_element = self.map_data[row][col]
@@ -34,13 +37,14 @@ class SokobanGame(arcade.Window):
                     case '$':
                         boxes.append([row, col])
                     case '@':
-                        initial_player_position = [row,col]
+                        self.player_position = [row,col]
+                        self.clean_cell(row, col)
                     case '.':
                         self.goals.append([row, col])
                     #case '*':
                         #self.goals.add((row,  col))
                         #boxes.append([row , col])
-        self.current_state = Uninformed_State(boxes, initial_player_position)
+        self.current_state = Uninformed_State(boxes, self.player_position)
 
         self.num_rows = len(self.map_data)
         self.num_cols = len(self.map_data[0])
@@ -55,8 +59,9 @@ class SokobanGame(arcade.Window):
             for key, img in ELEMENTS.items()
         }
 
-    def on_draw(self):
+        arcade.schedule(self.update_game, 0.5)
 
+    def on_draw(self):
         for row in range(self.num_rows):
             for col in range(self.num_cols):
                 x = col * PNG_SIZE + PNG_SIZE // 2
@@ -65,13 +70,51 @@ class SokobanGame(arcade.Window):
                 tile = self.map_data[row][col]
                 if tile in self.textures and self.textures[tile]:
                     rect = arcade.Rect(x-PNG_SIZE//2, x+PNG_SIZE//2, y-PNG_SIZE//2, y+PNG_SIZE//2, PNG_SIZE, PNG_SIZE, x, y)
-
                     arcade.draw_texture_rect(self.textures[tile], rect)
 
+        px = self.player_position[1] * PNG_SIZE + PNG_SIZE // 2
+        py = (self.num_rows - self.player_position[0] - 1) * PNG_SIZE + PNG_SIZE // 2  
+        rect = arcade.Rect(px-PNG_SIZE//2, px+PNG_SIZE//2, py-PNG_SIZE//2, py+PNG_SIZE//2, PNG_SIZE, PNG_SIZE, px, py)
+        arcade.draw_texture_rect(self.textures["@"], rect)
+
+        for goal in self.goals:
+            if(self.map_data[goal[0]][goal[1]] == " "):
+                gx = goal[1] * PNG_SIZE + PNG_SIZE // 2
+                gy = (self.num_rows - goal[0] - 1) * PNG_SIZE + PNG_SIZE // 2
+                rect = arcade.Rect(gx-PNG_SIZE//2, gx+PNG_SIZE//2, gy-PNG_SIZE//2, gy+PNG_SIZE//2, PNG_SIZE, PNG_SIZE, gx, gy)
+                arcade.draw_texture_rect(self.textures["."], rect)
+
+
+    def update_game(self, delta_time):
+        if self.current_move_index < len(self.moves):
+            move = self.moves[self.current_move_index]
+            new_x = self.player_position[0] + move[0]
+            new_y = self.player_position[1] + move[1]
+
+            if(self.map_data[new_x][new_y] == "$" or self.map_data[new_x][new_y] == "*"):
+                new_box_x = new_x + move[0]
+                new_box_y = new_y + move[1]
+                if [new_box_x, new_box_y] in self.goals:
+                    self.map_data[new_box_x][new_box_y] = "*"
+                else:
+                    self.map_data[new_box_x][new_box_y] = "$"
+
+            self.clean_cell(self.player_position[0], self.player_position[1])
+            self.player_position = [new_x, new_y]
+            self.current_move_index += 1
+
+    def clean_cell(self, row, col):
+        if(self.map_data[row][col] != "."):
+            self.map_data[row][col] = " "
 
 
 if __name__ == "__main__":
-    game = SokobanGame("./maps/3.txt")
+    game = SokobanGame("./maps/3.txt", [])
     load_all_playable_positions_for_boxes(game)
-#    arcade.run()
-    print(uninformed_search_algorithm(game, game.current_state, is_goal, get_children, None, "dfs"))
+    moves = uninformed_search_algorithm(game, game.current_state, is_goal, get_children, None, "dfs")
+    game.moves = moves
+    print(moves)
+    arcade.run()
+
+
+    
