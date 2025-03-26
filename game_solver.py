@@ -69,7 +69,7 @@ def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sort
             end_time = time.time()
             write_output(method, "Éxito", current_node, iteration, len(frontier), (end_time - start_time) * 1000)
             write_output_for_visualization(method, current_node)
-            return current_node.get_path()
+            return current_node.get_moves()
 
         # 14: n → Exp
         explored.append(current_node.state)
@@ -105,28 +105,16 @@ def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sort
     write_output(method, "Fracaso", current_node, iteration, len(frontier), (end_time - start_time) * 1000)
     return None
 
-# starts where the player is located in the current state
 def get_children(current_node, game):
-    # I want to visit every position possible and continue exploring in depth
-    # I check positions for up, right, down and left (in that order)
-    # I need to check if it is a deadlock
-    # I need to make sure that the next move doesn't undo the 
-    # last move (I could be in a loop or make more steps) unless there is no other choice and i need to return the parent
+    # starts where the player is located in the current state
     starting_point = current_node.state.player
     last_state = current_node.state
     result = []
     directions= [[- 1, 0], [0, 1], [1, 0], [0, -1]]
 
-    if (current_node.action != None):
-        last_move = str(current_node.action)
-        opposite_move = {"[-1, 0]": [1, 0], "[0, 1]": [0, -1], "[1, 0]": [-1, 0] , "[0, -1]": [0, 1]}
-        undo_last_move = opposite_move[last_move]
-        directions.remove(undo_last_move)
-     
     for direction in directions:
         current_position = [starting_point[0] + direction[0], starting_point[1] + direction[1]]
         if check_limits([starting_point[0] + direction[0], starting_point[1] + direction[1]], game, last_state, direction):
-            # chequeo si existe una caja en la posición a la que nos movemos
             new_boxes = last_state.boxes.copy()
             boxed_moved = False
             if current_position in last_state.boxes:
