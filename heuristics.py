@@ -1,4 +1,5 @@
 from scipy.optimize import linear_sum_assignment
+from game_solver import check_simple_deadlock_for_boxes
 
 class HeuristicBase:
     def __init__(self, goals):
@@ -16,6 +17,12 @@ class ManhattanDistance(HeuristicBase):
             manhattan_distance += min_distance
         return manhattan_distance
     
+class ManhattanDistanceWithDeadlockDetection(ManhattanDistance):
+    def get(self, boxes, game):
+        if check_simple_deadlock_for_boxes(boxes, game):
+            return float('inf')
+        return super.get(boxes)
+
 # Mejora de la heurística de Manhattan: no permite que dos cajas tengan un mismo objetivo
 # No considera obstaculos
 class ManhattanImproved(HeuristicBase):
@@ -48,6 +55,11 @@ class CombinedHeuristic(HeuristicBase):
     def get(self, boxes, player):
         return ManhattanDistance(self.goals).get(boxes) + PlayerDistance(self.goals).get(boxes, player)
     
+class CombinedHeuristicWithDeadlockDetection(CombinedHeuristic):
+    def get(self, boxes, player, game):
+        if check_simple_deadlock_for_boxes(boxes, game):
+            return float('inf')
+        return super.get(boxes, player)
 
 
 
