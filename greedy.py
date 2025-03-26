@@ -13,6 +13,7 @@ class Greedy:
         self.parent = {}
         self.map = map
         self.best_heuristic = {}
+        self.frontier = set()
 
     def search(self):
 
@@ -31,7 +32,6 @@ class Greedy:
         self.best_heuristic[self.initial_state] = h_n
 
         while self.priority_queue:
-            answer['frontier'] += len(self.priority_queue)
             current_h_n, current_state = heapq.heappop(self.priority_queue)
 
             if current_state.is_goal():
@@ -39,6 +39,7 @@ class Greedy:
                 answer['path'] = self.get_path(current_state)[0]
                 answer['directions'] = self.get_path(current_state)[1]
                 answer['explored'] = len(self.explored) 
+                answer['frontier'] = len(self.explored) + len(self.priority_queue)
                 return answer
 
             self.explored.add(current_state)
