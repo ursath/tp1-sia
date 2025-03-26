@@ -108,7 +108,7 @@ class A_star:
                     self.parent[new_state] = (current_state, direction)
 
         print("No path found.")
-        answer['execution_time'] = time.time() - answer['execution_time']
+        answer['execution_time'] = (time.time() - answer['execution_time']) * 1000
         answer['path'] = []
         answer['directions'] = []
         answer['explored'] = len(self.explored)
