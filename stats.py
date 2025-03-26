@@ -31,8 +31,8 @@ def average_time(map_name):
 
     plt.bar(['Greedy', 'A*'], [mean_greedy, mean_a_star], color=['blue', 'orange'])
     plt.errorbar(['Greedy', 'A*'], [mean_greedy, mean_a_star], yerr=[std_greedy, std_a_star], fmt='o', color='black')
-    plt.ylabel('Execution Time (ms)')
-    plt.title(f'Average Execution Time for Map {map_name[:-4]}')
+    plt.ylabel('Tiempo de Ejecucion (ms)')
+    plt.title(f'Tiempo de Ejecucion para el Mapa {map_name[:-4]}')
     #plt.savefig(f'{graphs_folder}average_time_{map_name[:-4]}.png')
     plt.show()
     
@@ -52,8 +52,8 @@ def average_frontier_nodes(map_name):
 
     plt.bar(['Greedy', 'A*'], [mean_greedy, mean_a_star], color=['blue', 'orange'])
     plt.errorbar(['Greedy', 'A*'], [mean_greedy, mean_a_star], yerr=[std_greedy, std_a_star], fmt='o', color='black')
-    plt.ylabel('Frontier Nodes')
-    plt.title(f'Average Frontier Nodes for Map {map_name[:-4]}')
+    plt.ylabel('Nodos Frontera')
+    plt.title(f'Cantidad Promedio de Nodos Frontera para el Mapa {map_name[:-4]}')
     #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
     plt.show()
 
@@ -87,8 +87,8 @@ def greedy_vs_a_star_frontier_nodes_all():
 
     ax.set_xticks(x)
     ax.set_xticklabels(maps, rotation=45)
-    ax.set_ylabel('Frontier nodes')
-    ax.set_title('Frontier Nodes for Each Map')
+    ax.set_ylabel('Nodos Frontera')
+    ax.set_title('Cantidad Promedio de Nodos Frontera para Cada Mapa')
     ax.legend()
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
@@ -125,8 +125,8 @@ def greedy_vs_a_star_exp_nodes(map_name):
 
     ax.set_xticks(x)
     ax.set_xticklabels(maps, rotation=45)
-    ax.set_ylabel('Explored nodes')
-    ax.set_title('Explored Nodes for Each Map')
+    ax.set_ylabel('Nodos Explorados')
+    ax.set_title('Nodos Explorados para cada Mapas')
     ax.legend()
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}explored_nodes_maps_all.png')
@@ -164,8 +164,8 @@ def greedy_vs_a_star_time():
 
     ax.set_xticks(x)
     ax.set_xticklabels(maps, rotation=45)
-    ax.set_ylabel('Execution Time (ms)')
-    ax.set_title('Execution Time for Each Map')
+    ax.set_ylabel('Tiempo de Ejecucion (ms)')
+    ax.set_title('Tiempo de Ejecucion Promedio para cada Mapa')
     ax.legend()
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}execution_time_maps.png')
@@ -207,6 +207,17 @@ def path_len_greed_vs_a_star():
     #plt.savefig(f'{graphs_folder}path_len_maps.png')
     plt.show()
 
+def avg_running_time():
+    df = pd.read_csv(filename)
+
+    df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['execution_time'].mean()
+    df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['execution_time'].mean()
+
+    greedy_time = df_greedy_mean.mean()
+    a_star_time = df_a_star_mean.mean()
+
+    print(f'Tiempo de ejecucion promedio para Greedy: {greedy_time} error: {df_greedy_mean.std()}')
+    print(f'Tiempo de ejecucion promedio para A*: {a_star_time} error: {df_a_star_mean.std()}')
 
 def main():
     run_a_10_times()
@@ -216,8 +227,9 @@ def main():
     # average_frontier_nodes('1.txt')
     # greedy_vs_a_star_exp_nodes('1.txt')
     # greedy_vs_a_star_frontier_nodes_all()
-    #greedy_vs_a_star_time()
-    path_len_greed_vs_a_star()
+    # greedy_vs_a_star_time()
+    # path_len_greed_vs_a_star()
+    # avg_running_time()
 
 if __name__ == "__main__":
     main()
