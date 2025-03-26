@@ -23,7 +23,6 @@ class SokobanGame(arcade.Window):
 
         self.walls = [] 
         self.goals = []
-        self.valid_box_positions= []
         boxes = []
 
         self.moves = moves  
@@ -113,11 +112,11 @@ class SokobanGame(arcade.Window):
 if __name__ == "__main__":
     data_map = "./maps/6.txt"
     game = SokobanGame(data_map, [])
-    load_all_playable_positions_for_boxes(game)
+    valid_box_positions = load_all_playable_positions_for_boxes(game.goals, game.walls)
     #moves = uninformed_search_algorithm(game, game.current_state, is_goal, get_children, None, "bfs")
     #moves = get_greedy(data_map, "combined", game)
-    moves = get_astar(data_map, "combined_with_deadlock_detection", game)
-    game.moves = moves
+    moves = get_astar(data_map, "combined_with_deadlock_detection", valid_box_positions)
+    game.moves = moves['directions']
     print(moves)
     arcade.run()
 
