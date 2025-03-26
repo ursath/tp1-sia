@@ -1,5 +1,5 @@
 import heapq
-from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic
+from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection
 import time
 
 
@@ -43,7 +43,7 @@ class State:
         return self.boxes == self.targets
 
 class A_star:
-    def __init__(self, initial_state, heuristics, map):
+    def __init__(self, initial_state, heuristics, map, game):
         self.initial_state = initial_state
         self.heuristics = heuristics
         self.explored = set()
@@ -52,6 +52,7 @@ class A_star:
         self.parent = {}
         self.frontier = set()
         self.map = map
+        self.game = game
 
     def search(self):
 
@@ -88,6 +89,10 @@ class A_star:
                     if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
                         # ManhattanDistance and ManhattanImproved only take boxes
                         f_n = new_g_n + self.heuristics.get(new_state.boxes)
+                    elif isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
+                        f_n = new_g_n + self.heuristics.get(new_state.boxes, self.game)
+                    elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
+                        f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player, self.game)
                     else:
                         # PlayerDistance or CombinedHeuristic take boxes and player
                         f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player)
@@ -141,27 +146,39 @@ def get_astar(data_map, heuristic, game):
 
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
+    manhattan_with_deadlock_detection = ManhattanDistanceWithDeadlockDetection(map.targets)
     player_distance = PlayerDistance(map.targets)
     combined_heuristic = CombinedHeuristic(map.targets)
+    combined_heuristic_with_deadlock_detection = CombinedHeuristicWithDeadlockDetection(map.targets)
 
     initial_state = State(map.boxes, map.player, map.targets)
 
     if heuristic == "manhattan_distance":
         print("AStar - Manhattan Distance")
-        a_star_manhattan = A_star(initial_state, manhattan_distance, map)
+        a_star_manhattan = A_star(initial_state, manhattan_distance, map, game)
         return execute(a_star_manhattan)
 
     if heuristic == "manhattan_improved":
         print("AStar - Manhattan Improved")
-        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
+        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map, game)
         return execute(a_star_manhattan_improved)
+
+    if heuristic == "manhattan_with_deadlock_detection":
+        print("AStar - Manhattan With Deadlock Detection")
+        a_star_manhattan_deadlock= A_star(initial_state, manhattan_with_deadlock_detection, map, game)
+        return execute(a_star_manhattan_deadlock)
     
     if heuristic == "player_distance":
         print("AStar - Player Distance")
-        a_star_player_distance = A_star(initial_state, player_distance, map)
+        a_star_player_distance = A_star(initial_state, player_distance, map, game)
         return execute(a_star_player_distance)
 
     if heuristic == "combined":
         print("AStar - Combined")
-        a_star_combined = A_star(initial_state, combined_heuristic, map)
+        a_star_combined = A_star(initial_state, combined_heuristic, map, game)
         return execute(a_star_combined)
+
+    if heuristic == "combined_with_deadlock_detection":
+        print("AStar - Combined With Deadlock Detection")
+        a_star_combined_deadlock = A_star(initial_state, combined_heuristic_with_deadlock_detection , map, game)
+        return execute(a_star_combined_deadlock)
