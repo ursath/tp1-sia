@@ -55,21 +55,10 @@ class CombinedHeuristic(HeuristicBase):
     def get(self, boxes, player):
         return ManhattanDistance(self.goals).get(boxes) + PlayerDistance(self.goals).get(boxes, player)
     
-class CombinedHeuristicWithDeadlockDetection(CombinedHeuristic):
+class CombinedHeuristicWithDeadlockDetection(HeuristicBase):
     def get(self, boxes, player, game):
         if check_simple_deadlock_for_boxes(boxes, game):
             return float('inf')
-        return super.get(boxes, player)
+        return CombinedHeuristic(self.goals).get(boxes, player)
 
-
-
-
-if __name__ == "__main__":
-    goals = [[1, 4], [6, 2]]
-    HeuristicBase(goals)
-    boxes = [[1, 1], [4, 4]]
-    heuristic = ManhattanDistance(goals)
-    print(heuristic.get(boxes))
-    heuristic = ManhattanImproved(goals)
-    print(heuristic.get(boxes))
         
