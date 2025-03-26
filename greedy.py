@@ -2,6 +2,7 @@ import heapq
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic
 from a_star import A_star, State, MapInfo
 import time
+import os 
 
 class Greedy:
 
@@ -35,6 +36,10 @@ class Greedy:
             current_h_n, current_state = heapq.heappop(self.priority_queue)
 
             if current_state.is_goal():
+                f = open("data/stats.csv","a")
+                line = f"{self.map.name},Greedy,{self.heuristics.__class__.__name__},{time.time() - answer['execution_time']},{len(self.explored)},{len(self.priority_queue)},{len(self.get_path(current_state)[0])}\n"
+                f.write(line)
+                f.close()
                 answer['execution_time'] = time.time() - answer['execution_time']
                 answer['path'] = self.get_path(current_state)[0]
                 answer['directions'] = self.get_path(current_state)[1]
@@ -62,7 +67,12 @@ class Greedy:
                     self.parent[new_state] = (current_state, direction)
 
         print("No path found.")
-        return [] 
+        answer['execution_time'] = time.time() - answer['execution_time']
+        answer['path'] = []
+        answer['directions'] = []
+        answer['explored'] = len(self.explored)
+        answer['g_n'] = 0
+        return answer
 
     def get_path(self, state):
         path = []
@@ -84,7 +94,7 @@ def load_map(map_file):
     with open(map_file, "r") as f:
         return [list(line.strip()) for line in f.readlines()]
     
-def execute(greedy):
+def execute_g(greedy):
     answer = greedy.search()
 
     print(f"Execution time: {answer['execution_time']}")
@@ -93,7 +103,7 @@ def execute(greedy):
     print(f"Path length: {len(answer['path'])}")
     print(f"Directions: {answer['directions']}")
     print("-----")
-    return answer['directions']
+    return answer
 
 def get_greedy(data_map, heuristic, game):
     map = MapInfo(load_map(data_map))
@@ -108,20 +118,60 @@ def get_greedy(data_map, heuristic, game):
     if heuristic == "manhattan_distance":
         print("Greedy - Manhattan Distance")
         greedy_manhattan = Greedy(initial_state, manhattan_distance, map)
-        return execute(greedy_manhattan)
+        return execute_g(greedy_manhattan)
 
     if heuristic == "manhattan_improved":
         print("Greedy - Manhattan Improved")
         greedy_manhattan_improved = Greedy(initial_state, manhattan_improved, map)
-        return execute(greedy_manhattan_improved)
+        return execute_g(greedy_manhattan_improved)
    
     if heuristic == "player_distance":
         print("Greedy - Player Distance")
         greedy_player_distance = Greedy(initial_state, player_distance, map)
-        return execute(greedy_player_distance)
+        return execute_g(greedy_player_distance)
 
     if heuristic == "combined":
         print("Greedy - Combined")
         greedy_combined = Greedy(initial_state, combined_heuristic, map)
-        return execute(greedy_combined)
+        return execute_g(greedy_combined)
 
+def run_g_10_times():
+
+    # if csv not exist create and add header
+    if 'stats.csv' not in os.listdir('data'):
+        file = open('data/stats.csv', 'w')
+        file.write('map,algorithm,heuristic,execution_time,explored,frontier,path_length\n')
+        file.close()
+
+    maps = []
+    for m in os.listdir('maps'):
+        maps.append(MapInfo(load_map(f"maps/{m}"), m))
+        map = MapInfo(load_map(f"maps/{m}"), m)
+    
+        manhattan_distance = ManhattanDistance(map.targets)
+        manhattan_improved = ManhattanImproved(map.targets)
+        player_distance = PlayerDistance(map.targets)
+        combined_heuristic = CombinedHeuristic(map.targets)
+        initial_state = State(map.boxes, map.player, map.targets)
+        
+        print("AStar - Manhattan Distance")
+        greedy_manhattan = Greedy(initial_state, manhattan_distance, map)
+        execute_g(greedy_manhattan)
+
+        print("AStar - Manhattan Improved")
+        greedy_manhattan_improved = Greedy(initial_state, manhattan_improved, map)
+        execute_g(greedy_manhattan_improved)
+        
+        print("AStar - Player Distance")
+        greedy_player_distance = Greedy(initial_state, player_distance, map)
+        execute_g(greedy_player_distance)
+        
+        print("AStar - Combined")
+        greedy_combined = Greedy(initial_state, combined_heuristic, map)
+        execute_g(greedy_combined)
+
+def main():
+    run_g_10_times()
+
+if __name__ == "__main__":
+    main()

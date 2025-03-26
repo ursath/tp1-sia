@@ -1,5 +1,5 @@
-from a_star import A_star, MapInfo, State
-from greedy import Greedy
+from a_star import run_a_10_times
+from greedy import run_g_10_times
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic
 import os
 from matplotlib import pyplot as plt
@@ -22,45 +22,6 @@ def load_maps():
             maps.append([list(line.strip()) for line in f.readlines()])
     return maps
 
-def a_star_n_times(n):
-    maps = load_maps()
-    for map in maps:
-        map_name = str(maps.index(map)+1) + ".txt"
-        map_info = MapInfo(map)
-
-        manhattan_distance = ManhattanDistance(map_info.targets)
-        manhattan_improved = ManhattanImproved(map_info.targets)
-        player_distance = PlayerDistance(map_info.targets)
-        combined_heuristic = CombinedHeuristic(map_info.targets)
-
-        heuristics = [manhattan_distance, manhattan_improved, player_distance, combined_heuristic]
-
-        for i in range(n):
-            initial_state = State(map_info.boxes, map_info.player, map_info.targets)
-            for heuristic in heuristics:
-                a_star = A_star(initial_state, heuristic, map_info)
-                answer = a_star.search()
-                file.write(f"{map_name},A*,{answer['execution_time']},{answer['explored']},{answer['frontier']},{len(answer['path'])}\n")
-
-def greedy_n_times(n):
-    maps = load_maps()
-    for map in maps:
-        map_name = str(maps.index(map)+1) + ".txt"
-        map_info = MapInfo(map)
-
-        manhattan_distance = ManhattanDistance(map_info.targets)
-        manhattan_improved = ManhattanImproved(map_info.targets)
-        player_distance = PlayerDistance(map_info.targets)
-        combined_heuristic = CombinedHeuristic(map_info.targets)
-
-        heuristics = [manhattan_distance, manhattan_improved, player_distance, combined_heuristic]
-
-        for i in range(n):
-            initial_state = State(map_info.boxes, map_info.player, map_info.targets)
-            for heuristic in heuristics:
-                greedy = Greedy(initial_state, heuristic, map_info)
-                answer = greedy.search()
-                file.write(f"{map_name},greedy,{answer['execution_time']},{answer['explored']},{answer['frontier']},{len(answer['path'])}\n")
 
 # Tiempo promedio en n iteraciones de x algoritmo
 def average_time(map_name):
@@ -82,7 +43,6 @@ def average_time(map_name):
     plt.title(f'Average Execution Time for Map {map_name[:-4]}')
     #plt.savefig(f'{graphs_folder}average_time_{map_name[:-4]}.png')
     plt.show()
-
     
 # Cantidad de nodos frontera promedio en n iteraciones de x algoritmo
 def average_frontier_nodes(map_name):
@@ -219,7 +179,6 @@ def greedy_vs_a_star_time():
     #plt.savefig(f'{graphs_folder}execution_time_maps.png')
     plt.show()
 
-
 def path_len_greed_vs_a_star():
     df = pd.read_csv(filename)
 
@@ -258,9 +217,8 @@ def path_len_greed_vs_a_star():
 
 
 def main():
-    # a_star_n_times(10)
-    # greedy_n_times(10)
-    file.close()
+    run_a_10_times()
+    run_g_10_times()
 
     average_time('1.txt')
     average_frontier_nodes('1.txt')

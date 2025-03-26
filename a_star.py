@@ -1,7 +1,7 @@
 import heapq
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic
 import time
-
+import os
 
 class State:
     def __init__(self, boxes, player, targets):
@@ -66,6 +66,11 @@ class A_star:
             f_n, g_n, current_state = heapq.heappop(self.priority_queue)
 
             if current_state.is_goal():
+                f = open("data/stats.csv","a")
+                line = f"{self.map.name},A8,{self.heuristics.__class__.__name__},{time.time() - answer['execution_time']},{len(self.explored)},{len(self.priority_queue)},{len(self.get_path(current_state)[0])}\n"
+                f.write(line)
+                f.close()
+                
                 answer['explored'] = len(self.explored)
                 answer['execution_time'] = time.time() - answer['execution_time']
                 answer['frontier'] = len(self.explored) + len(self.priority_queue)
@@ -95,7 +100,12 @@ class A_star:
                     self.parent[new_state] = (current_state, direction)
 
         print("No path found.")
-        return None, 0  # No path found
+        answer['execution_time'] = time.time() - answer['execution_time']
+        answer['path'] = []
+        answer['directions'] = []
+        answer['explored'] = len(self.explored)
+        answer['g_n'] = 0
+        return answer  # No path found
     
     def get_path(self, state):
         path = []
@@ -112,9 +122,41 @@ class A_star:
         directions.reverse()
         return path, directions
 
+def run_a_10_times():
+
+    # if csv not exist create and add header
+    if 'stats.csv' not in os.listdir('data'):
+        file = open('data/stats.csv', 'w')
+        file.write('map,algorithm,heuristic,execution_time,explored,frontier,path_length\n')
+        file.close()
+
+    maps = []
+    for m in os.listdir('maps'):
+        maps.append(MapInfo(load_map(f"maps/{m}"), m))
+        map = MapInfo(load_map(f"maps/{m}"), m)
+    
+        manhattan_distance = ManhattanDistance(map.targets)
+        manhattan_improved = ManhattanImproved(map.targets)
+        player_distance = PlayerDistance(map.targets)
+        combined_heuristic = CombinedHeuristic(map.targets)
+        initial_state = State(map.boxes, map.player, map.targets)
+        print("AStar - Manhattan Distance")
+        a_star_manhattan = A_star(initial_state, manhattan_distance, map)
+        execute_a(a_star_manhattan)
+        print("AStar - Manhattan Improved")
+        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
+        execute_a(a_star_manhattan_improved)
+        print("AStar - Player Distance")
+        a_star_player_distance = A_star(initial_state, player_distance, map)
+        execute_a(a_star_player_distance)
+        print("AStar - Combined")
+        a_star_combined = A_star(initial_state, combined_heuristic, map)
+        execute_a(a_star_combined)
+
 class MapInfo:
-    def __init__(self, map):
+    def __init__(self, map, name):
         self.map = map
+        self.name = name
         self.targets = {(x, y) for x, row in enumerate(map) for y, cell in enumerate(row) if cell == "."}
         self.boxes = {(x, y) for x, row in enumerate(map) for y, cell in enumerate(row) if cell == "$"}
         self.player = next((x, y) for x, row in enumerate(map) for y, cell in enumerate(row) if cell == "@")
@@ -124,7 +166,7 @@ def load_map(map_file):
     with open(map_file, "r") as f:
         return [list(line.strip()) for line in f.readlines()]
     
-def execute(a_star):
+def execute_a(a_star):
     answer = a_star.search()
 
     print(f"Execution time: {answer['execution_time']}")
@@ -134,10 +176,18 @@ def execute(a_star):
     print(f"g_n: {answer['g_n']}")
     print(f"Directions: {answer['directions']}")
     print("-------")
-    return answer['directions']
+    return answer
+
+
+def main():
+    run_a_10_times()
+
+
+if __name__ == "__main__":
+    main()
 
 def get_astar(data_map, heuristic, game):
-    map = MapInfo(load_map(data_map))
+    map = MapInfo(load_map(data_map), "")
 
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
@@ -149,19 +199,19 @@ def get_astar(data_map, heuristic, game):
     if heuristic == "manhattan_distance":
         print("AStar - Manhattan Distance")
         a_star_manhattan = A_star(initial_state, manhattan_distance, map)
-        return execute(a_star_manhattan)
+        return execute_a(a_star_manhattan)
 
     if heuristic == "manhattan_improved":
         print("AStar - Manhattan Improved")
         a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
-        return execute(a_star_manhattan_improved)
+        return execute_a(a_star_manhattan_improved)
     
     if heuristic == "player_distance":
         print("AStar - Player Distance")
         a_star_player_distance = A_star(initial_state, player_distance, map)
-        return execute(a_star_player_distance)
+        return execute_a(a_star_player_distance)
 
     if heuristic == "combined":
         print("AStar - Combined")
         a_star_combined = A_star(initial_state, combined_heuristic, map)
-        return execute(a_star_combined)
+        return execute_a(a_star_combined)
