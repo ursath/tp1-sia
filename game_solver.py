@@ -128,7 +128,7 @@ def get_children(current_node, game):
             else:
                 new_state = Uninformed_State(new_boxes, current_position)
 
-            result.append([direction, new_state, 0, boxed_moved, current_node.depth + 1])
+            result.append([direction, new_state, 1, boxed_moved, current_node.depth + 1])
 
     return result
 
@@ -160,7 +160,7 @@ def is_blocked_box_for_direction(coordinates, last_state, direction):
 def write_output(method, result, current_node, iteration, frontier_len, time):
     with open(f'{method}_results.txt', 'w') as file:
         file.write(f"Resultado: {result}\n")
-        file.write(f"Costo: {current_node.depth}\n")
+        file.write(f"Costo: {current_node.cost}\n")
         file.write(f"Cantidad de Nodos Expandidos: {iteration}\n")
         file.write(f"Cantidad de Nodos Frontera: {iteration + frontier_len}\n")
         file.write(f"Solución:\n")
