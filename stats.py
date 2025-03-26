@@ -19,7 +19,7 @@ file = open(filename, 'a')
 def average_time(map_name):
     df = pd.read_csv(filename)
     df['execution_time'] = pd.to_numeric(df['execution_time'])
-    df['execution_time_ms'] = df['execution_time'] * 1000
+    df['execution_time_ms'] = df['execution_time'] 
 
     df_greedy = df[df['algorithm'] == 'Greedy'].groupby('map')
     df_a_star = df[df['algorithm'] == 'A*'].groupby('map')
@@ -40,7 +40,7 @@ def average_time(map_name):
 def average_frontier_nodes(map_name):
     df = pd.read_csv(filename)
     df['execution_time'] = pd.to_numeric(df['execution_time'])
-    df['execution_time_ms'] = df['execution_time'] * 1000
+    df['execution_time_ms'] = df['execution_time'] 
 
     df_greedy = df[df['algorithm'] == 'Greedy'].groupby('map')
     df_a_star = df[df['algorithm'] == 'A*'].groupby('map')
@@ -136,7 +136,7 @@ def greedy_vs_a_star_exp_nodes(map_name):
 def greedy_vs_a_star_time():
     df = pd.read_csv(filename)
     df['execution_time'] = pd.to_numeric(df['execution_time'])
-    df['execution_time_ms'] = df['execution_time'] * 1000
+    df['execution_time_ms'] = df['execution_time'] 
 
     df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['execution_time_ms'].mean()
     df_greedy_std = df[df['algorithm'] == 'Greedy'].groupby('map')['execution_time_ms'].std()

@@ -168,8 +168,8 @@ def load_all_playable_positions_for_boxes(goals, walls):
     for goal in goals:
         # Create a set to track explored positions during pulling
         explored = []
-        frontier = [goal]
-        explored.append(goal)
+        frontier = [[goal[0], goal[1]]]
+        explored.append([goal[0], goal[1]])
         
         # Directions for pulling (opposite of pushing)
         directions = [
@@ -201,7 +201,7 @@ def load_all_playable_positions_for_boxes(goals, walls):
                 # 1. Box position is not a wall
                 # 2. Player position is not a wall
                 # 3. Box position hasn't been explored before
-                if (box_position not in walls and 
+                if ((box_position[0], box_position[1]) not in walls and 
                     player_position not in walls and 
                     box_position not in explored):
                     
