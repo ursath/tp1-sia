@@ -12,16 +12,8 @@ graphs_folder = 'data/graphs/'
 
 if not os.path.exists(filename):
     with open(filename, 'w') as file:
-        file.write('map,algorithm,execution_time,explored,frontier,path_length\n')
+        file.write('map,algorithm,heuristic,execution_time,explored,frontier,path_length\n')
 file = open(filename, 'a')
-
-def load_maps():
-    maps = []
-    for map_dir in os.listdir('maps'):
-        with open(f"maps/{map_dir}", "r") as f:
-            maps.append([list(line.strip()) for line in f.readlines()])
-    return maps
-
 
 # Tiempo promedio en n iteraciones de x algoritmo
 def average_time(map_name):
@@ -29,7 +21,7 @@ def average_time(map_name):
     df['execution_time'] = pd.to_numeric(df['execution_time'])
     df['execution_time_ms'] = df['execution_time'] * 1000
 
-    df_greedy = df[df['algorithm'] == 'greedy'].groupby('map')
+    df_greedy = df[df['algorithm'] == 'Greedy'].groupby('map')
     df_a_star = df[df['algorithm'] == 'A*'].groupby('map')
 
     mean_greedy = df_greedy.get_group(map_name)['execution_time_ms'].mean()
@@ -50,7 +42,7 @@ def average_frontier_nodes(map_name):
     df['execution_time'] = pd.to_numeric(df['execution_time'])
     df['execution_time_ms'] = df['execution_time'] * 1000
 
-    df_greedy = df[df['algorithm'] == 'greedy'].groupby('map')
+    df_greedy = df[df['algorithm'] == 'Greedy'].groupby('map')
     df_a_star = df[df['algorithm'] == 'A*'].groupby('map')
 
     mean_greedy = df_greedy.get_group(map_name)['frontier'].mean()
@@ -69,8 +61,8 @@ def greedy_vs_a_star_frontier_nodes_all():
     df = pd.read_csv(filename)
     df['frontier'] = pd.to_numeric(df['frontier'])
 
-    df_greedy_mean = df[df['algorithm'] == 'greedy'].groupby('map')['frontier'].mean()
-    df_greedy_std = df[df['algorithm'] == 'greedy'].groupby('map')['frontier'].std()
+    df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['frontier'].mean()
+    df_greedy_std = df[df['algorithm'] == 'Greedy'].groupby('map')['frontier'].std()
     df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['frontier'].mean()
     df_a_star_std = df[df['algorithm'] == 'A*'].groupby('map')['frontier'].std()
 
@@ -107,8 +99,8 @@ def greedy_vs_a_star_exp_nodes(map_name):
     df = pd.read_csv(filename)
     df['explored'] = pd.to_numeric(df['explored'])
 
-    df_greedy_mean = df[df['algorithm'] == 'greedy'].groupby('map')['explored'].mean()
-    df_greedy_std = df[df['algorithm'] == 'greedy'].groupby('map')['explored'].std()
+    df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['explored'].mean()
+    df_greedy_std = df[df['algorithm'] == 'Greedy'].groupby('map')['explored'].std()
     df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['explored'].mean()
     df_a_star_std = df[df['algorithm'] == 'A*'].groupby('map')['explored'].std()
 
@@ -146,8 +138,8 @@ def greedy_vs_a_star_time():
     df['execution_time'] = pd.to_numeric(df['execution_time'])
     df['execution_time_ms'] = df['execution_time'] * 1000
 
-    df_greedy_mean = df[df['algorithm'] == 'greedy'].groupby('map')['execution_time_ms'].mean()
-    df_greedy_std = df[df['algorithm'] == 'greedy'].groupby('map')['execution_time_ms'].std()
+    df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['execution_time_ms'].mean()
+    df_greedy_std = df[df['algorithm'] == 'Greedy'].groupby('map')['execution_time_ms'].std()
     df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['execution_time_ms'].mean()
     df_a_star_std = df[df['algorithm'] == 'A*'].groupby('map')['execution_time_ms'].std()
 
@@ -182,8 +174,8 @@ def greedy_vs_a_star_time():
 def path_len_greed_vs_a_star():
     df = pd.read_csv(filename)
 
-    df_greedy_mean = df[df['algorithm'] == 'greedy'].groupby('map')['path_length'].mean()
-    df_greedy_std = df[df['algorithm'] == 'greedy'].groupby('map')['path_length'].std()
+    df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['path_length'].mean()
+    df_greedy_std = df[df['algorithm'] == 'Greedy'].groupby('map')['path_length'].std()
     df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['path_length'].mean()
     df_a_star_std = df[df['algorithm'] == 'A*'].groupby('map')['path_length'].std()
 
@@ -217,14 +209,14 @@ def path_len_greed_vs_a_star():
 
 
 def main():
-    run_a_10_times()
-    run_g_10_times()
+    # run_a_10_times()
+    # run_g_10_times()
 
-    average_time('1.txt')
-    average_frontier_nodes('1.txt')
-    greedy_vs_a_star_exp_nodes('1.txt')
-    greedy_vs_a_star_frontier_nodes_all()
-    greedy_vs_a_star_time()
+    # average_time('1.txt')
+    # average_frontier_nodes('1.txt')
+    # greedy_vs_a_star_exp_nodes('1.txt')
+    # greedy_vs_a_star_frontier_nodes_all()
+    #greedy_vs_a_star_time()
     path_len_greed_vs_a_star()
 
 if __name__ == "__main__":
