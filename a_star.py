@@ -50,6 +50,7 @@ class A_star:
         self.priority_queue = []
         self.g_cost_accum = {initial_state: 0}
         self.parent = {}
+        self.frontier = set()
         self.map = map
 
     def search(self):
@@ -62,12 +63,12 @@ class A_star:
         heapq.heappush(self.priority_queue, (0, 0, self.initial_state))  # (f(n), g(n), state)
 
         while self.priority_queue:
-            answer['frontier'] += len(self.priority_queue)
             f_n, g_n, current_state = heapq.heappop(self.priority_queue)
 
             if current_state.is_goal():
                 answer['explored'] = len(self.explored)
                 answer['execution_time'] = time.time() - answer['execution_time']
+                answer['frontier'] = len(self.explored) + len(self.priority_queue)
                 answer['path'] = self.get_path(current_state)[0]
                 answer['directions'] = self.get_path(current_state)[1]
                 answer['g_n'] = g_n 
