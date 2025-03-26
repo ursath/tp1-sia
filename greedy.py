@@ -93,9 +93,10 @@ def execute(greedy):
     print(f"Path length: {len(answer['path'])}")
     print(f"Directions: {answer['directions']}")
     print("-----")
+    return answer['directions']
 
-def main():
-    map = MapInfo(load_map("maps/2.txt"))
+def get_greedy(data_map, heuristic, game):
+    map = MapInfo(load_map(data_map))
 
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
@@ -104,18 +105,23 @@ def main():
 
     initial_state = State(map.boxes, map.player, map.targets)
 
-    greedy_manhattan = Greedy(initial_state, manhattan_distance, map)
-    execute(greedy_manhattan)
+    if heuristic == "manhattan_distance":
+        print("Greedy - Manhattan Distance")
+        greedy_manhattan = Greedy(initial_state, manhattan_distance, map)
+        return execute(greedy_manhattan)
 
-    greedy_manhattan_improved = Greedy(initial_state, manhattan_improved, map)
-    execute(greedy_manhattan_improved)
+    if heuristic == "manhattan_improved":
+        print("Greedy - Manhattan Improved")
+        greedy_manhattan_improved = Greedy(initial_state, manhattan_improved, map)
+        return execute(greedy_manhattan_improved)
    
-    greedy_player_distance = Greedy(initial_state, player_distance, map)
-    execute(greedy_player_distance)
+    if heuristic == "player_distance":
+        print("Greedy - Player Distance")
+        greedy_player_distance = Greedy(initial_state, player_distance, map)
+        return execute(greedy_player_distance)
 
-    greedy_combined = Greedy(initial_state, combined_heuristic, map)
-    execute(greedy_combined)
+    if heuristic == "combined":
+        print("Greedy - Combined")
+        greedy_combined = Greedy(initial_state, combined_heuristic, map)
+        return execute(greedy_combined)
 
-
-if __name__ == "__main__":
-    main()

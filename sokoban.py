@@ -1,6 +1,8 @@
 import os
 import arcade
 from game_solver import *
+from greedy import get_greedy
+from a_star import get_astar
 
 SCREEN_TITLE = "Sokoban Game"
 PNG_SIZE = 64
@@ -109,9 +111,12 @@ class SokobanGame(arcade.Window):
 
 
 if __name__ == "__main__":
-    game = SokobanGame("./maps/3.txt", [])
+    data_map = "./maps/1.txt"
+    game = SokobanGame(data_map, [])
     load_all_playable_positions_for_boxes(game)
-    moves = uninformed_search_algorithm(game, game.current_state, is_goal, get_children, None, "dfs")
+    #moves = uninformed_search_algorithm(game, game.current_state, is_goal, get_children, None, "bfs")
+    #moves = get_greedy(data_map, "combined", game)
+    moves = get_astar(data_map, "player_distance", game)
     game.moves = moves
     print(moves)
     arcade.run()

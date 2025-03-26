@@ -134,9 +134,10 @@ def execute(a_star):
     print(f"g_n: {answer['g_n']}")
     print(f"Directions: {answer['directions']}")
     print("-------")
+    return answer['directions']
 
-def main():
-    map = MapInfo(load_map("maps/2.txt"))
+def get_astar(data_map, heuristic, game):
+    map = MapInfo(load_map(data_map))
 
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
@@ -145,18 +146,22 @@ def main():
 
     initial_state = State(map.boxes, map.player, map.targets)
 
-    a_star_manhattan = A_star(initial_state, manhattan_distance, map)
-    execute(a_star_manhattan)
+    if heuristic == "manhattan_distance":
+        print("AStar - Manhattan Distance")
+        a_star_manhattan = A_star(initial_state, manhattan_distance, map)
+        return execute(a_star_manhattan)
 
-    a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
-    execute(a_star_manhattan_improved)
-   
-    a_star_player_distance = A_star(initial_state, player_distance, map)
-    execute(a_star_player_distance)
+    if heuristic == "manhattan_improved":
+        print("AStar - Manhattan Improved")
+        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
+        return execute(a_star_manhattan_improved)
+    
+    if heuristic == "player_distance":
+        print("AStar - Player Distance")
+        a_star_player_distance = A_star(initial_state, player_distance, map)
+        return execute(a_star_player_distance)
 
-    a_star_combined = A_star(initial_state, combined_heuristic, map)
-    execute(a_star_combined)
-
-
-if __name__ == "__main__":
-    main()
+    if heuristic == "combined":
+        print("AStar - Combined")
+        a_star_combined = A_star(initial_state, combined_heuristic, map)
+        return execute(a_star_combined)
