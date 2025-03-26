@@ -50,6 +50,7 @@ class A_star:
         self.priority_queue = []
         self.g_cost_accum = {initial_state: 0}
         self.parent = {}
+        self.frontier = set()
         self.map = map
 
     def search(self):
@@ -62,12 +63,12 @@ class A_star:
         heapq.heappush(self.priority_queue, (0, 0, self.initial_state))  # (f(n), g(n), state)
 
         while self.priority_queue:
-            answer['frontier'] += len(self.priority_queue)
             f_n, g_n, current_state = heapq.heappop(self.priority_queue)
 
             if current_state.is_goal():
                 answer['explored'] = len(self.explored)
                 answer['execution_time'] = time.time() - answer['execution_time']
+                answer['frontier'] = len(self.explored) + len(self.priority_queue)
                 answer['path'] = self.get_path(current_state)[0]
                 answer['directions'] = self.get_path(current_state)[1]
                 answer['g_n'] = g_n 
@@ -133,9 +134,10 @@ def execute(a_star):
     print(f"g_n: {answer['g_n']}")
     print(f"Directions: {answer['directions']}")
     print("-------")
+    return answer['directions']
 
-def main():
-    map = MapInfo(load_map("maps/2.txt"))
+def get_astar(data_map, heuristic, game):
+    map = MapInfo(load_map(data_map))
 
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
@@ -144,18 +146,22 @@ def main():
 
     initial_state = State(map.boxes, map.player, map.targets)
 
-    a_star_manhattan = A_star(initial_state, manhattan_distance, map)
-    execute(a_star_manhattan)
+    if heuristic == "manhattan_distance":
+        print("AStar - Manhattan Distance")
+        a_star_manhattan = A_star(initial_state, manhattan_distance, map)
+        return execute(a_star_manhattan)
 
-    a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
-    execute(a_star_manhattan_improved)
-   
-    a_star_player_distance = A_star(initial_state, player_distance, map)
-    execute(a_star_player_distance)
+    if heuristic == "manhattan_improved":
+        print("AStar - Manhattan Improved")
+        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
+        return execute(a_star_manhattan_improved)
+    
+    if heuristic == "player_distance":
+        print("AStar - Player Distance")
+        a_star_player_distance = A_star(initial_state, player_distance, map)
+        return execute(a_star_player_distance)
 
-    a_star_combined = A_star(initial_state, combined_heuristic, map)
-    execute(a_star_combined)
-
-
-if __name__ == "__main__":
-    main()
+    if heuristic == "combined":
+        print("AStar - Combined")
+        a_star_combined = A_star(initial_state, combined_heuristic, map)
+        return execute(a_star_combined)
