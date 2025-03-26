@@ -111,12 +111,12 @@ class SokobanGame(arcade.Window):
 
 
 if __name__ == "__main__":
-    data_map = "./maps/4.txt"
+    data_map = "./maps/1.txt"
     game = SokobanGame(data_map, [])
     load_all_playable_positions_for_boxes(game)
     #moves = uninformed_search_algorithm(game, game.current_state, is_goal, get_children, None, "bfs")
-    #moves = get_greedy(data_map, "combined")
-    moves = get_astar(data_map, "combined")
+    #moves = get_greedy(data_map, "combined", game)
+    moves = get_astar(data_map, "player_distance", game)
     game.moves = moves
     print(moves)
     arcade.run()

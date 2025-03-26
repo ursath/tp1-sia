@@ -136,7 +136,7 @@ def execute(a_star):
     print("-------")
     return answer['directions']
 
-def get_astar(data_map, heuristic):
+def get_astar(data_map, heuristic, game):
     map = MapInfo(load_map(data_map))
 
     manhattan_distance = ManhattanDistance(map.targets)
@@ -147,17 +147,21 @@ def get_astar(data_map, heuristic):
     initial_state = State(map.boxes, map.player, map.targets)
 
     if heuristic == "manhattan_distance":
+        print("AStar - Manhattan Distance")
         a_star_manhattan = A_star(initial_state, manhattan_distance, map)
         return execute(a_star_manhattan)
 
     if heuristic == "manhattan_improved":
+        print("AStar - Manhattan Improved")
         a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
         return execute(a_star_manhattan_improved)
     
     if heuristic == "player_distance":
+        print("AStar - Player Distance")
         a_star_player_distance = A_star(initial_state, player_distance, map)
         return execute(a_star_player_distance)
 
     if heuristic == "combined":
+        print("AStar - Combined")
         a_star_combined = A_star(initial_state, combined_heuristic, map)
         return execute(a_star_combined)

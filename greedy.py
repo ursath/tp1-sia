@@ -95,7 +95,7 @@ def execute(greedy):
     print("-----")
     return answer['directions']
 
-def get_greedy(data_map, heuristic):
+def get_greedy(data_map, heuristic, game):
     map = MapInfo(load_map(data_map))
 
     manhattan_distance = ManhattanDistance(map.targets)
@@ -106,18 +106,22 @@ def get_greedy(data_map, heuristic):
     initial_state = State(map.boxes, map.player, map.targets)
 
     if heuristic == "manhattan_distance":
+        print("Greedy - Manhattan Distance")
         greedy_manhattan = Greedy(initial_state, manhattan_distance, map)
         return execute(greedy_manhattan)
 
     if heuristic == "manhattan_improved":
+        print("Greedy - Manhattan Improved")
         greedy_manhattan_improved = Greedy(initial_state, manhattan_improved, map)
         return execute(greedy_manhattan_improved)
    
     if heuristic == "player_distance":
+        print("Greedy - Player Distance")
         greedy_player_distance = Greedy(initial_state, player_distance, map)
         return execute(greedy_player_distance)
 
     if heuristic == "combined":
+        print("Greedy - Combined")
         greedy_combined = Greedy(initial_state, combined_heuristic, map)
         return execute(greedy_combined)
 
