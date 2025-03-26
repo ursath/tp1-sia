@@ -127,7 +127,7 @@ class A_star:
         directions.reverse()
         return path, directions
 
-def run_a_10_times():
+def run_a_10_times(game):
 
     # if csv not exist create and add header
     if 'stats.csv' not in os.listdir('data'):
@@ -146,16 +146,16 @@ def run_a_10_times():
         combined_heuristic = CombinedHeuristic(map.targets)
         initial_state = State(map.boxes, map.player, map.targets)
         print("AStar - Manhattan Distance")
-        a_star_manhattan = A_star(initial_state, manhattan_distance, map)
+        a_star_manhattan = A_star(initial_state, manhattan_distance, map, game)
         execute_a(a_star_manhattan)
         print("AStar - Manhattan Improved")
-        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map)
+        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map, game)
         execute_a(a_star_manhattan_improved)
         print("AStar - Player Distance")
-        a_star_player_distance = A_star(initial_state, player_distance, map)
+        a_star_player_distance = A_star(initial_state, player_distance, map, game)
         execute_a(a_star_player_distance)
         print("AStar - Combined")
-        a_star_combined = A_star(initial_state, combined_heuristic, map)
+        a_star_combined = A_star(initial_state, combined_heuristic, map, game)
         execute_a(a_star_combined)
 
 class MapInfo:
@@ -211,24 +211,24 @@ def get_astar(data_map, heuristic, game):
     if heuristic == "manhattan_improved":
         print("AStar - Manhattan Improved")
         a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map, game)
-        return execute(a_star_manhattan_improved)
+        return execute_a(a_star_manhattan_improved)
 
     if heuristic == "manhattan_with_deadlock_detection":
         print("AStar - Manhattan With Deadlock Detection")
         a_star_manhattan_deadlock= A_star(initial_state, manhattan_with_deadlock_detection, map, game)
-        return execute(a_star_manhattan_deadlock)
+        return execute_a(a_star_manhattan_deadlock)
     
     if heuristic == "player_distance":
         print("AStar - Player Distance")
         a_star_player_distance = A_star(initial_state, player_distance, map, game)
-        return execute(a_star_player_distance)
+        return execute_a(a_star_player_distance)
 
     if heuristic == "combined":
         print("AStar - Combined")
         a_star_combined = A_star(initial_state, combined_heuristic, map, game)
-        return execute(a_star_combined)
+        return execute_a(a_star_combined)
 
     if heuristic == "combined_with_deadlock_detection":
         print("AStar - Combined With Deadlock Detection")
         a_star_combined_deadlock = A_star(initial_state, combined_heuristic_with_deadlock_detection , map, game)
-        return execute(a_star_combined_deadlock)
+        return execute_a(a_star_combined_deadlock)

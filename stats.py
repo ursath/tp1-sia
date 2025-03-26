@@ -209,8 +209,8 @@ def path_len_greed_vs_a_star():
 
 
 def main():
-    # run_a_10_times()
-    # run_g_10_times()
+    run_a_10_times()
+    run_g_10_times()
 
     # average_time('1.txt')
     # average_frontier_nodes('1.txt')
