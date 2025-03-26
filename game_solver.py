@@ -1,4 +1,6 @@
 import time
+from generate_outputs import write_output, write_output_for_visualization
+
 class Uninformed_State:
     def __init__(self, boxes, player, move = None):
         self.boxes = boxes
@@ -67,7 +69,7 @@ def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sort
         # 8-10: if n Goal then return solución
         if is_goal(current_node.state, game):
             end_time = time.time()
-            write_output(method, "Éxito", current_node, iteration, len(frontier), (end_time - start_time) * 1000)
+            write_output(method, "Éxito", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost)
             write_output_for_visualization(method, current_node)
             return current_node.get_moves()
 
@@ -102,7 +104,7 @@ def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sort
     
     # 17-19: if Solución vacía then No existe solución
     end_time = time.time()
-    write_output(method, "Fracaso", current_node, iteration, len(frontier), (end_time - start_time) * 1000)
+    write_output(method, "Fracaso", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost)
     return None
 
 def get_children(current_node, game):
@@ -157,33 +159,6 @@ def is_blocked_box_for_direction(coordinates, last_state, direction):
         return True
     return False
 
-def write_output(method, result, current_node, iteration, frontier_len, time):
-    with open(f'{method}_results.txt', 'w') as file:
-        file.write(f"Resultado: {result}\n")
-        file.write(f"Costo: {current_node.cost}\n")
-        file.write(f"Cantidad de Nodos Expandidos: {iteration}\n")
-        file.write(f"Cantidad de Nodos Frontera: {iteration + frontier_len}\n")
-        file.write(f"Solución:\n")
-        for node in current_node.get_path():
-            file.write(f"Paso {node.depth}:\n")
-            file.write("Estado:\n")
-            file.write(f"*  Posición del jugador: ({node.state.player[0]}, {node.state.player[1]})\n")
-            file.write(f"*  Posición de las cajas: [")
-            last_index = len(node.state.boxes)-1
-            for index in range(last_index):
-                file.write(f"({node.state.boxes[index][0]}, {node.state.boxes[index][1]}),")
-            file.write(f"({node.state.boxes[last_index][0]}, {node.state.boxes[last_index][1]})]\n")
-            push_status = "Si" if node.boxed_moved else "No"
-            file.write(f"*  Empuje: {push_status}\n")
-            if node.parent:
-                file.write(f"Movimiento previo: {node.action}\n\n")
-            else:
-                file.write(f"\n")
-        file.write(f"Tiempo de procesamiento: {time} ms\n")
-
-def write_output_for_visualization(method, current_node):
-    with open(f'{method}_visualization.txt', 'w') as file:
-        file.write(str(current_node.get_moves()))
 
 # For deadlocks -> move to heuristics
 def load_all_playable_positions_for_boxes(game):

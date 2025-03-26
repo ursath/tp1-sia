@@ -2,6 +2,7 @@ import heapq
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection
 import time
 import os
+from generate_outputs import write_output, write_output_for_visualization
 
 class State:
     def __init__(self, boxes, player, targets):
@@ -147,16 +148,23 @@ def run_a_10_times(game):
         initial_state = State(map.boxes, map.player, map.targets)
         print("AStar - Manhattan Distance")
         a_star_manhattan = A_star(initial_state, manhattan_distance, map, game)
-        execute_a(a_star_manhattan)
+        answer = execute_a(a_star_manhattan)
+        write_output("AStar_manhattan", "Éxito", answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]))
+
         print("AStar - Manhattan Improved")
         a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map, game)
         execute_a(a_star_manhattan_improved)
+        write_output("AStar_manhattan_improved", "Éxito", answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]))
+
         print("AStar - Player Distance")
         a_star_player_distance = A_star(initial_state, player_distance, map, game)
         execute_a(a_star_player_distance)
+        write_output("AStar_player_distance", "Éxito", answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]))
+
         print("AStar - Combined")
         a_star_combined = A_star(initial_state, combined_heuristic, map, game)
         execute_a(a_star_combined)
+        write_output("AStar_combined", "Éxito", answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]))
 
 class MapInfo:
     def __init__(self, map, name):
