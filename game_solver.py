@@ -246,9 +246,10 @@ def load_all_playable_positions_for_boxes(game):
 
 def check_simple_deadlock_for_boxes(boxes, game):
     for box in boxes:
-        if box not in game.valid_box_positions:
-            return True
-    return False
+        for valid_box in game.valid_box_positions:
+            if box[0] == valid_box[0] and box[1] == valid_box[1]:
+                return False     
+    return True
 
 def check_freeze_deadlock(state, game):
     for box in state.boxes:
