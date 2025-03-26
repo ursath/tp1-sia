@@ -1,7 +1,7 @@
 Resultado: Éxito
-Costo: 18
-Cantidad de Nodos Expandidos: 164
-Cantidad de Nodos Frontera: 174
+Costo: 22
+Cantidad de Nodos Expandidos: 256
+Cantidad de Nodos Frontera: 272
 Solución:
 Paso 0:
 Estado:
@@ -88,51 +88,79 @@ Movimiento previo: [0, -1]
 
 Paso 12:
 Estado:
-*  Posición del jugador: (1, 3)
+*  Posición del jugador: (2, 4)
 *  Posición de las cajas: [(4, 1),(2, 2)]
 *  Empuje: No
-Movimiento previo: [-1, 0]
+Movimiento previo: [0, 1]
 
 Paso 13:
 Estado:
-*  Posición del jugador: (1, 2)
-*  Posición de las cajas: [(4, 1),(2, 2)]
-*  Empuje: No
-Movimiento previo: [0, -1]
-
-Paso 14:
-Estado:
-*  Posición del jugador: (1, 1)
-*  Posición de las cajas: [(4, 1),(2, 2)]
-*  Empuje: No
-Movimiento previo: [0, -1]
-
-Paso 15:
-Estado:
-*  Posición del jugador: (2, 1)
+*  Posición del jugador: (3, 4)
 *  Posición de las cajas: [(4, 1),(2, 2)]
 *  Empuje: No
 Movimiento previo: [1, 0]
 
+Paso 14:
+Estado:
+*  Posición del jugador: (4, 4)
+*  Posición de las cajas: [(4, 1),(2, 2)]
+*  Empuje: No
+Movimiento previo: [1, 0]
+
+Paso 15:
+Estado:
+*  Posición del jugador: (4, 3)
+*  Posición de las cajas: [(4, 1),(2, 2)]
+*  Empuje: No
+Movimiento previo: [0, -1]
+
 Paso 16:
+Estado:
+*  Posición del jugador: (4, 2)
+*  Posición de las cajas: [(4, 1),(2, 2)]
+*  Empuje: No
+Movimiento previo: [0, -1]
+
+Paso 17:
+Estado:
+*  Posición del jugador: (3, 2)
+*  Posición de las cajas: [(4, 1),(2, 2)]
+*  Empuje: No
+Movimiento previo: [-1, 0]
+
+Paso 18:
+Estado:
+*  Posición del jugador: (3, 1)
+*  Posición de las cajas: [(4, 1),(2, 2)]
+*  Empuje: No
+Movimiento previo: [0, -1]
+
+Paso 19:
+Estado:
+*  Posición del jugador: (2, 1)
+*  Posición de las cajas: [(4, 1),(2, 2)]
+*  Empuje: No
+Movimiento previo: [-1, 0]
+
+Paso 20:
 Estado:
 *  Posición del jugador: (2, 2)
 *  Posición de las cajas: [(4, 1),(2, 3)]
 *  Empuje: Si
 Movimiento previo: [0, 1]
 
-Paso 17:
+Paso 21:
 Estado:
 *  Posición del jugador: (2, 3)
 *  Posición de las cajas: [(4, 1),(2, 4)]
 *  Empuje: Si
 Movimiento previo: [0, 1]
 
-Paso 18:
+Paso 22:
 Estado:
 *  Posición del jugador: (2, 4)
 *  Posición de las cajas: [(4, 1),(2, 5)]
 *  Empuje: Si
 Movimiento previo: [0, 1]
 
-Tiempo de procesamiento: 4.128932952880859 ms
+Tiempo de procesamiento: 13.030052185058594 ms
