@@ -116,7 +116,7 @@ def execute_g(greedy):
     return answer
 
 def get_greedy(data_map, heuristic, valid_box_positions):
-    map = MapInfo(load_map(data_map))
+    map = MapInfo(load_map(data_map), data_map)
 
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
