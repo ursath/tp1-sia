@@ -69,7 +69,7 @@ def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sort
         # 8-10: if n Goal then return solución
         if is_goal(current_node.state, game):
             end_time = time.time()
-            write_output(method, "Éxito", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost)
+            write_output(method, "Éxito", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost, True)
             write_output_for_visualization(method, current_node)
             return current_node.get_moves()
 
@@ -104,7 +104,7 @@ def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sort
     
     # 17-19: if Solución vacía then No existe solución
     end_time = time.time()
-    write_output(method, "Fracaso", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost)
+    write_output(method, "Fracaso", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost, True)
     return None
 
 def get_children(current_node, game):
@@ -161,11 +161,11 @@ def is_blocked_box_for_direction(coordinates, last_state, direction):
 
 
 # For deadlocks -> move to heuristics
-def load_all_playable_positions_for_boxes(game):
+def load_all_playable_positions_for_boxes(goals, walls):
     valid_box_positions = []
     
     # Iterate through each goal square
-    for goal in game.goals:
+    for goal in goals:
         # Create a set to track explored positions during pulling
         explored = []
         frontier = [goal]
@@ -201,8 +201,8 @@ def load_all_playable_positions_for_boxes(game):
                 # 1. Box position is not a wall
                 # 2. Player position is not a wall
                 # 3. Box position hasn't been explored before
-                if (box_position not in game.walls and 
-                    player_position not in game.walls and 
+                if (box_position not in walls and 
+                    player_position not in walls and 
                     box_position not in explored):
                     
                     # Mark this position as explored and add to frontier
@@ -214,14 +214,11 @@ def load_all_playable_positions_for_boxes(game):
             if pos not in valid_box_positions:
                 valid_box_positions.append(pos)
     
-    # Store in game's attribute
-    game.valid_box_positions = valid_box_positions
-    
-    return game.valid_box_positions
+    return valid_box_positions
 
-def check_simple_deadlock_for_boxes(boxes, game):
+def check_simple_deadlock_for_boxes(boxes, valid_box_positions):
     for box in boxes:
-        for valid_box in game.valid_box_positions:
+        for valid_box in valid_box_positions:
             if box[0] == valid_box[0] and box[1] == valid_box[1]:
                 return False     
     return True

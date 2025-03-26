@@ -1,12 +1,13 @@
 import heapq
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection
+from game_solver import load_all_playable_positions_for_boxes
 import time
 import os
 from generate_outputs import write_output, write_output_for_visualization
 
 class State:
     def __init__(self, boxes, player, targets):
-        self.boxes = frozenset(boxes) 
+        self.boxes = frozenset(boxes)
         self.player = player
         self.targets = frozenset(targets)
 
@@ -44,7 +45,7 @@ class State:
         return self.boxes == self.targets
 
 class A_star:
-    def __init__(self, initial_state, heuristics, map, game):
+    def __init__(self, initial_state, heuristics, map, valid_box_positions):
         self.initial_state = initial_state
         self.heuristics = heuristics
         self.explored = set()
@@ -53,7 +54,7 @@ class A_star:
         self.parent = {}
         self.frontier = set()
         self.map = map
-        self.game = game
+        self.valid_box_positions = valid_box_positions
 
     def search(self):
 
@@ -69,16 +70,17 @@ class A_star:
 
             if current_state.is_goal():
                 f = open("data/stats.csv","a")
-                line = f"{self.map.name},A*,{self.heuristics.__class__.__name__},{time.time() - answer['execution_time']},{len(self.explored)},{len(self.priority_queue)},{len(self.get_path(current_state)[0])}\n"
+                line = f"{self.map.name},A*,{self.heuristics.__class__.__name__},{(time.time() - answer['execution_time']) * 1000},{len(self.explored)},{len(self.priority_queue)},{len(self.get_path(current_state)[0])}\n"
                 f.write(line)
                 f.close()
 
                 answer['explored'] = len(self.explored)
-                answer['execution_time'] = time.time() - answer['execution_time']
+                answer['execution_time'] = (time.time() - answer['execution_time']) * 1000
                 answer['frontier'] = len(self.explored) + len(self.priority_queue)
                 answer['path'] = self.get_path(current_state)[0]
                 answer['directions'] = self.get_path(current_state)[1]
                 answer['g_n'] = g_n 
+                answer['result'] = "Exito"
                 return answer
 
             self.explored.add(current_state)
@@ -96,9 +98,9 @@ class A_star:
                         # ManhattanDistance and ManhattanImproved only take boxes
                         f_n = new_g_n + self.heuristics.get(new_state.boxes)
                     elif isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
-                        f_n = new_g_n + self.heuristics.get(new_state.boxes, self.game)
+                        f_n = new_g_n + self.heuristics.get(new_state.boxes, self.valid_box_positions)
                     elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
-                        f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player, self.game)
+                        f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player, self.valid_box_positions)
                     else:
                         # PlayerDistance or CombinedHeuristic take boxes and player
                         f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player)
@@ -111,6 +113,7 @@ class A_star:
         answer['directions'] = []
         answer['explored'] = len(self.explored)
         answer['g_n'] = 0
+        answer['result'] = "Fracaso"
         return answer  # No path found
     
     def get_path(self, state):
@@ -128,7 +131,7 @@ class A_star:
         directions.reverse()
         return path, directions
 
-def run_a_10_times(game):
+def run_a_10_times():
 
     # if csv not exist create and add header
     if 'stats.csv' not in os.listdir('data'):
@@ -140,6 +143,7 @@ def run_a_10_times(game):
     for m in os.listdir('maps'):
         maps.append(MapInfo(load_map(f"maps/{m}"), m))
         map = MapInfo(load_map(f"maps/{m}"), m)
+        valid_box_positions = load_all_playable_positions_for_boxes(list(map.targets), list(map.walls)) 
     
         manhattan_distance = ManhattanDistance(map.targets)
         manhattan_improved = ManhattanImproved(map.targets)
@@ -147,24 +151,26 @@ def run_a_10_times(game):
         combined_heuristic = CombinedHeuristic(map.targets)
         initial_state = State(map.boxes, map.player, map.targets)
         print("AStar - Manhattan Distance")
-        a_star_manhattan = A_star(initial_state, manhattan_distance, map, game)
+        a_star_manhattan = A_star(initial_state, manhattan_distance, map, valid_box_positions)
         answer = execute_a(a_star_manhattan)
-        write_output("AStar_manhattan", "Éxito", answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]))
+        write_output("AStar_manhattan", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
 
+        a_star_manhattan = A_star(initial_state, manhattan_distance, map, valid_box_positions)
+        execute_a(a_star_manhattan)
         print("AStar - Manhattan Improved")
-        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map, game)
-        execute_a(a_star_manhattan_improved)
-        write_output("AStar_manhattan_improved", "Éxito", answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]))
+        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map, valid_box_positions)
+        answer = execute_a(a_star_manhattan_improved)
+        write_output("AStar_manhattan_improved", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
 
         print("AStar - Player Distance")
-        a_star_player_distance = A_star(initial_state, player_distance, map, game)
-        execute_a(a_star_player_distance)
-        write_output("AStar_player_distance", "Éxito", answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]))
+        a_star_player_distance = A_star(initial_state, player_distance, map, valid_box_positions)
+        answer = execute_a(a_star_player_distance)
+        write_output("AStar_player_distance", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
 
         print("AStar - Combined")
-        a_star_combined = A_star(initial_state, combined_heuristic, map, game)
-        execute_a(a_star_combined)
-        write_output("AStar_combined", "Éxito", answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]))
+        a_star_combined = A_star(initial_state, combined_heuristic, map, valid_box_positions)
+        answer = execute_a(a_star_combined)
+        write_output("AStar_combined", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
 
 class MapInfo:
     def __init__(self, map, name):
@@ -199,7 +205,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-def get_astar(data_map, heuristic, game):
+def get_astar(data_map, heuristic, valid_box_positions):
     map = MapInfo(load_map(data_map), "")
 
     manhattan_distance = ManhattanDistance(map.targets)
@@ -211,32 +217,45 @@ def get_astar(data_map, heuristic, game):
 
     initial_state = State(map.boxes, map.player, map.targets)
 
+   
     if heuristic == "manhattan_distance":
         print("AStar - Manhattan Distance")
-        a_star_manhattan = A_star(initial_state, manhattan_distance, map)
-        return execute_a(a_star_manhattan)
+        a_star_manhattan = A_star(initial_state, manhattan_distance, map, valid_box_positions)
+        answer = execute_a(a_star_manhattan)
+        write_output("AStar_combined", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+        return answer
 
     if heuristic == "manhattan_improved":
         print("AStar - Manhattan Improved")
-        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map, game)
-        return execute_a(a_star_manhattan_improved)
+        a_star_manhattan_improved = A_star(initial_state, manhattan_improved, map, valid_box_positions)
+        answer = execute_a(a_star_manhattan_improved)
+        write_output("AStar_manhattan_improved", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+        return answer
 
     if heuristic == "manhattan_with_deadlock_detection":
         print("AStar - Manhattan With Deadlock Detection")
-        a_star_manhattan_deadlock= A_star(initial_state, manhattan_with_deadlock_detection, map, game)
-        return execute_a(a_star_manhattan_deadlock)
+        a_star_manhattan_deadlock= A_star(initial_state, manhattan_with_deadlock_detection, map, valid_box_positions)
+        answer = execute_a(a_star_manhattan_deadlock)
+        write_output("AStar_manhattan_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+        return answer
     
     if heuristic == "player_distance":
         print("AStar - Player Distance")
-        a_star_player_distance = A_star(initial_state, player_distance, map, game)
-        return execute_a(a_star_player_distance)
+        a_star_player_distance = A_star(initial_state, player_distance, map, valid_box_positions)
+        answer = execute_a(a_star_player_distance)
+        write_output("AStar_player_distance", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+        return answer
 
     if heuristic == "combined":
         print("AStar - Combined")
-        a_star_combined = A_star(initial_state, combined_heuristic, map, game)
-        return execute_a(a_star_combined)
+        a_star_combined = A_star(initial_state, combined_heuristic, map, valid_box_positions)
+        answer = execute_a(a_star_combined)
+        write_output("AStar_combined", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+        return answer
 
     if heuristic == "combined_with_deadlock_detection":
         print("AStar - Combined With Deadlock Detection")
-        a_star_combined_deadlock = A_star(initial_state, combined_heuristic_with_deadlock_detection , map, game)
-        return execute_a(a_star_combined_deadlock)
+        a_star_combined_deadlock = A_star(initial_state, combined_heuristic_with_deadlock_detection , map, valid_box_positions)
+        answer = execute_a(a_star_combined_deadlock)
+        write_output("AStar_combined_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+        return answer
