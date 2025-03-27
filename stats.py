@@ -48,7 +48,7 @@ def exp_nodes_by_heuristic(map_name, algorithm):
     combined_dl_std = df_combined_dl['explored'].std()
 
     plt.bar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [man_avg, man_imp_avg, player_avg, combined_avg, man_dl_avg, combined_dl_avg], color=['blue', 'orange', 'green', 'red'])
-    plt.errorbar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [man_avg, man_imp_avg, player_avg, combined_avg, man_dl_avg, combined_dl_avg], yerr=[man_std, man_imp_std, player_avg, combined_std, man_dl_std, combined_dl_std], fmt='o', color='black')
+    plt.errorbar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [man_avg, man_imp_avg, player_avg, combined_avg, man_dl_avg, combined_dl_avg], yerr=[man_std, man_imp_std, player_std, combined_std, man_dl_std, combined_dl_std], fmt='o', color='black')
     plt.ylabel('Nodos Expandidos')
     plt.xticks(rotation=45)
     plt.title(f'Nodos Expandidos para el Mapa {map_name[:-4]} y el algoritmo {algorithm}')
