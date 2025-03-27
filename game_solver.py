@@ -43,6 +43,59 @@ class Node:
             current_node= current_node.parent
         return list(reversed(path))          
 
+def get_children_array(current_node, walls):
+    # starts where the player is located in the current state
+    starting_point = current_node.state.player
+    last_state = current_node.state
+    result = []
+    directions= [[- 1, 0], [0, 1], [1, 0], [0, -1]]
+
+    for direction in directions:
+        current_position = [starting_point[0] + direction[0], starting_point[1] + direction[1]]
+        if check_limits_array([starting_point[0] + direction[0], starting_point[1] + direction[1]], walls, last_state, direction):
+            new_boxes = last_state.boxes.copy()
+            boxed_moved = False
+            if current_position in last_state.boxes:
+                box = ([current_position[0] + direction[0], current_position[1] + direction[1]])
+                if not check_limits_array(box, walls, last_state, direction):
+                    continue
+                boxed_moved = True
+                new_boxes.remove(current_position)
+                new_boxes.append(box)
+                new_state = Uninformed_State(new_boxes, current_position)
+            else:
+                new_state = Uninformed_State(new_boxes, current_position)
+
+            result.append([direction, new_state, 1, boxed_moved, current_node.depth + 1])
+
+    return result
+
+def is_goal_array(state, goals):
+    for box_position in state.boxes:
+        if box_position not in goals:
+            return False
+
+    return True
+
+# making sure that the next position is not occupied by a wall or a stucked box
+def check_limits_array(coordinates, walls, last_state, direction):
+    if coordinates in walls:
+        return False
+    if coordinates in last_state.boxes:
+        if is_blocked_box_for_direction_array(coordinates, last_state, direction):
+            return False
+    return True
+
+
+# direction can be only be an array with [dx, dy]
+def is_blocked_box_for_direction_array(coordinates, last_state, direction):
+    if coordinates not in last_state.boxes:
+        return False
+    if [coordinates[0] + direction[0], coordinates[1] + direction[1]] in last_state.boxes:
+        return True
+    return False
+
+
 def uninformed_search_algorithm(map_name, goals, walls, initial_state, is_goal, get_children, sorting_criteria=None, method="bfs"):
     start_time = time.time()
     # 4: Crear Tr, Fr, Exp vacíos
