@@ -189,6 +189,9 @@ def run_g_10_times():
         manhattan_improved = ManhattanImproved(map.targets)
         player_distance = PlayerDistance(map.targets)
         combined_heuristic = CombinedHeuristic(map.targets)
+        manhattan_with_deadlock_detection = ManhattanDistanceWithDeadlockDetection(map.targets)
+        combined_heuristic_with_deadlock_detection = CombinedHeuristicWithDeadlockDetection(map.targets)
+
         initial_state = State(map.boxes, map.player, map.targets)
         
         print("Greedy - Manhattan Distance")
@@ -210,6 +213,17 @@ def run_g_10_times():
         greedy_combined = Greedy(initial_state, combined_heuristic, map, valid_box_positions)
         answer = execute_g(greedy_combined)
         write_output("Greedy_combined", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+
+        print("Greedy - Manhattan_with_deadlock_detection")
+        greedy_manhattan_with_deadlock = Greedy(initial_state, manhattan_with_deadlock_detection, map, valid_box_positions)
+        answer = execute_g(greedy_manhattan_with_deadlock)
+        write_output("Greedy_manhattan_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+
+        print("Greedy - Combined With Deadlock Detection")
+        greedy_combined_with_deadlock = Greedy(initial_state, combined_heuristic_with_deadlock_detection, map, valid_box_positions)
+        answer = execute_g(greedy_combined_with_deadlock)
+        write_output("Greedy_combined_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+
 
 def main():
     run_g_10_times()

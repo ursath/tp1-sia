@@ -93,7 +93,6 @@ class A_star:
                 new_g_n = g_n + 1
                 if new_state not in self.g_cost_accum or new_g_n < self.g_cost_accum[new_state]:
                     self.g_cost_accum[new_state] = new_g_n
-
                     if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
                         # ManhattanDistance and ManhattanImproved only take boxes
                         f_n = new_g_n + self.heuristics.get(new_state.boxes)
@@ -149,6 +148,9 @@ def run_a_10_times():
         manhattan_improved = ManhattanImproved(map.targets)
         player_distance = PlayerDistance(map.targets)
         combined_heuristic = CombinedHeuristic(map.targets)
+        manhattan_with_deadlock_detection = ManhattanDistanceWithDeadlockDetection(map.targets)
+        combined_heuristic_with_deadlock_detection = CombinedHeuristicWithDeadlockDetection(map.targets)
+
         initial_state = State(map.boxes, map.player, map.targets)
         print("AStar - Manhattan Distance")
         a_star_manhattan = A_star(initial_state, manhattan_distance, map, valid_box_positions)
@@ -171,6 +173,16 @@ def run_a_10_times():
         a_star_combined = A_star(initial_state, combined_heuristic, map, valid_box_positions)
         answer = execute_a(a_star_combined)
         write_output("AStar_combined", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+
+        print("AStar - Manhattan With Deadlock Detection")
+        a_star_manhattan_with_deadlock = A_star(initial_state, manhattan_with_deadlock_detection, map, valid_box_positions)
+        answer = execute_a(a_star_manhattan_with_deadlock)
+        write_output("AStar_manhattan_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+
+        print("AStar - Combined With Deadlock Detection")
+        a_star_combined_with_deadlock = A_star(initial_state, combined_heuristic_with_deadlock_detection, map, valid_box_positions)
+        answer = execute_a(a_star_combined_with_deadlock)
+        write_output("AStar_combined_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
 
 class MapInfo:
     def __init__(self, map, name):
