@@ -228,6 +228,8 @@ def run_uninformative_search(method="bfs"):
         file.close()
 
     for m in os.listdir('maps'):
+        if (m == "Dificil.txt"):
+            continue
         map_data = load_map(f"maps/{m}")
         walls = [] 
         goals = []
