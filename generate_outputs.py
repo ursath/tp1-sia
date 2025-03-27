@@ -32,6 +32,8 @@ def write_output(method, result, path, iteration, frontier, time, cost, is_uninf
             previous_node = node.player
         file.write(f"Tiempo de procesamiento: {time} ms\n")
 
-def write_output_for_visualization(method, current_node):
-    with open(f'{method}_visualization.txt', 'w') as file:
-        file.write(str(current_node.get_moves()))
+def write_output_for_visualization(map, method, execution_time, explored, frontier, steps):
+    with open(f'{method}_for_map_{map}.csv', 'w') as file:
+        if (len(file) < 1):
+            file.write('map,algorithm,execution_time,explored,frontier,path_length\n')
+        file.write(f'{map},{method},{execution_time},{explored},{frontier},{steps}\n')

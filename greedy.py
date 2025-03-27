@@ -25,13 +25,13 @@ class Greedy:
         answer['execution_time'] = time.time()  # To substract from the end time
         answer['frontier'] = 0
 
-        if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
-            # ManhattanDistance and ManhattanImproved only take boxes
-            h_n = self.heuristics.get(self.initial_state.boxes)
-        elif isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
+        if isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
             h_n = self.heuristics.get(self.initial_state.boxes, self.valid_box_positions)
         elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
             h_n = self.heuristics.get(self.initial_state.boxes, self.initial_state.player, self.valid_box_positions)
+        elif isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
+            # ManhattanDistance and ManhattanImproved only take boxes
+            h_n = self.heuristics.get(self.initial_state.boxes)
         else:
             # PlayerDistance or CombinedHeuristic take boxes and player
             h_n = self.heuristics.get(self.initial_state.boxes, self.initial_state.player)
@@ -62,13 +62,13 @@ class Greedy:
                 if new_state is None or new_state in self.explored:
                     continue
 
-                if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
-                    # ManhattanDistance and ManhattanImproved only take boxes
-                    h_n = self.heuristics.get(new_state.boxes)
-                elif isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
+                if isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
                     h_n = self.heuristics.get(new_state.boxes, self.valid_box_positions)
                 elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
                     h_n = self.heuristics.get(new_state.boxes, new_state.player, self.valid_box_positions)
+                elif isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
+                    # ManhattanDistance and ManhattanImproved only take boxes
+                    h_n = self.heuristics.get(new_state.boxes) 
                 else:
                     # PlayerDistance or CombinedHeuristic take boxes and player
                     h_n = self.heuristics.get(new_state.boxes, new_state.player)

@@ -93,13 +93,14 @@ class A_star:
                 new_g_n = g_n + 1
                 if new_state not in self.g_cost_accum or new_g_n < self.g_cost_accum[new_state]:
                     self.g_cost_accum[new_state] = new_g_n
-                    if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
-                        # ManhattanDistance and ManhattanImproved only take boxes
-                        f_n = new_g_n + self.heuristics.get(new_state.boxes)
-                    elif isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
+
+                    if isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
                         f_n = new_g_n + self.heuristics.get(new_state.boxes, self.valid_box_positions)
                     elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
                         f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player, self.valid_box_positions)
+                    elif isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
+                        # ManhattanDistance and ManhattanImproved only take boxes
+                        f_n = new_g_n + self.heuristics.get(new_state.boxes)
                     else:
                         # PlayerDistance or CombinedHeuristic take boxes and player
                         f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player)
