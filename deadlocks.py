@@ -101,7 +101,7 @@ def check_corral_deadlock(walls,goals,player,boxes,box_moved,valid_boxes):
     new_is_goal = partial(is_corral_goal, corral=corral,deleted_boxes=deleted_boxes,walls=walls,goals=goals)
 
     
-    corral_solution = uninformed_search_algorithm(walls,goals, deleted_boxes_state, new_is_goal, get_children, None, "bfs")
+    corral_solution = uninformed_search_algorithm("",goals,walls, deleted_boxes_state, new_is_goal, get_children, None, "bfs")
 
     # If there is no solution, then the corral is a deadlock
     # If any of the boxes in the corral is freezed, then the corral is a deadlock
@@ -143,7 +143,7 @@ def is_corral_goal(state, game,corral,deleted_boxes,walls,goals):
         for box in deleted_boxes:
             state.boxes.append(box)
         state = Uninformed_State(state.boxes, state.player)
-        uninformed_search_algorithm(walls,goals, state, is_goal, get_children, None, "dfs")
+        uninformed_search_algorithm("",goals,walls, state, is_goal, get_children, None, "dfs")
 
     return False
 

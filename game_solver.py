@@ -173,13 +173,13 @@ def run_uninformative_search(method="bfs"):
         file = open('data/stats.csv', 'w')
         file.write('map,algorithm,heuristic,execution_time,explored,frontier,path_length\n')
         file.close()
-        maps = []
+    maps = []
 
     for m in os.listdir('maps'):
         maps.append(MapInfo(load_map(f"maps/{m}"), m))
         map = MapInfo(load_map(f"maps/{m}"), m)
         initial_state = Uninformed_State(map.boxes, map.player)
-        uninformed_search_algorithm(map.targets, map.walls, initial_state, is_goal, get_children, None, method)
+        uninformed_search_algorithm(m,map.targets, map.walls, initial_state, is_goal, get_children, None, method)
 
 # For deadlocks -> move to heuristics
 def load_all_playable_positions_for_boxes(goals, walls):

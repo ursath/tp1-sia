@@ -323,30 +323,30 @@ def avg_running_time():
     print(f'Tiempo de ejecucion promedio para A*: {a_star_time} error: {df_a_star_mean.std()}')
 
 def main():
-    run_a_10_times()
-    run_g_10_times()
-    run_a_10_times()
-    run_g_10_times()
-    run_a_10_times()
-    run_g_10_times()
-    #run_uninformative_search("dfs")
-    #run_uninformative_search("bfs")
+    #run_a_10_times()
+    #run_g_10_times()
+    #run_a_10_times()
+    #run_g_10_times()
+    #run_a_10_times()
+    #run_g_10_times()
+    run_uninformative_search("dfs")
+    run_uninformative_search("bfs")
 
-    average_time('Dificil.txt')
-    average_frontier_nodes('Dificil.txt')
-    average_explored_nodes('Dificil.txt')
-
-    greedy_vs_a_star_exp_nodes_all()
-    greedy_vs_a_star_frontier_nodes_all()
-
-    path_len_greed_vs_a_star()
-    avg_running_time()
-
-    exp_nodes_by_heuristic('Medio.txt', 'Greedy')
-    exp_nodes_by_heuristic('Medio.txt', 'A*')
-
-    optimal_path_by_heuristic('Medio.txt', 'Greedy')
-    optimal_path_by_heuristic('Medio.txt', 'A*')
+    #average_time('Dificil.txt')
+    #average_frontier_nodes('Dificil.txt')
+    #average_explored_nodes('Dificil.txt')
+#
+    #greedy_vs_a_star_exp_nodes_all()
+    #greedy_vs_a_star_frontier_nodes_all()
+#
+    #path_len_greed_vs_a_star()
+    #avg_running_time()
+#
+    #exp_nodes_by_heuristic('Medio.txt', 'Greedy')
+    #exp_nodes_by_heuristic('Medio.txt', 'A*')
+#
+    #optimal_path_by_heuristic('Medio.txt', 'Greedy')
+    #optimal_path_by_heuristic('Medio.txt', 'A*')
 
 if __name__ == "__main__":
     main()
