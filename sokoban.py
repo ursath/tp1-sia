@@ -111,9 +111,10 @@ class SokobanGame(arcade.Window):
 
 if __name__ == "__main__":
     data_map = "./maps/1.txt"
+    map_name = os.path.splitext(os.path.basename(data_map))[0]
     game = SokobanGame(data_map, [])
     valid_box_positions = load_all_playable_positions_for_boxes(game.goals, game.walls)
-    #moves = uninformed_search_algorithm(game, game.current_state, is_goal, get_children, None, "dfs")
+    moves = uninformed_search_algorithm(game, game.current_state, is_goal, get_children, None, "dfs")
     #game.moves = moves
     #moves = get_greedy(data_map, "combined", game)
     moves = get_astar(data_map, "manhattan_distance", valid_box_positions)
