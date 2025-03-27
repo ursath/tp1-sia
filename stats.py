@@ -48,7 +48,6 @@ def exp_nodes_by_heuristic(map_name, algorithm):
     combined_dl_std = df_combined_dl['explored'].std()
 
     plt.bar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [man_avg, man_imp_avg, player_avg, combined_avg, man_dl_avg, combined_dl_avg], color=['blue', 'orange', 'green', 'red'])
-    plt.errorbar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [man_avg, man_imp_avg, player_avg, combined_avg, man_dl_avg, combined_dl_avg], yerr=[man_std, man_imp_std, player_std, combined_std, man_dl_std, combined_dl_std], fmt='o', color='black')
     plt.ylabel('Nodos Expandidos')
     plt.xticks(rotation=45)
     plt.title(f'Nodos Expandidos para el Mapa {map_name[:-4]} con el algoritmo {algorithm}')
@@ -88,10 +87,9 @@ def optimal_path_by_heuristic(map_name, method):
 
 
     plt.bar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [path_manhattan, path_manhattan_improved, path_player_distance, path_combined, man_dl_path, combined_dl_path], color=['blue', 'orange', 'green', 'red'])
-    plt.errorbar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [path_manhattan, path_manhattan_improved, path_player_distance, path_combined, man_dl_path, combined_dl_path], yerr=[path_manhattan_avg, path_manhattan_improved_avg, path_player_distance_avg, path_combined_avg, man_dl_path_std, combined_dl_path_std], fmt='o', color='black')
     plt.xticks(rotation=45)
     plt.ylabel('Longitud del camino')
-    plt.title(f'Longitud del camino optimo para el Mapa {map_name[:-4]} con el algoritmo Greedy')
+    plt.title(f'Longitud del camino optimo para el Mapa {map_name[:-4]} con el algoritmo {method}')
     #plt.savefig(f'{graphs_folder}optimal_path_{map_name[:-4]}.png')
     plt.show()
 
@@ -114,6 +112,7 @@ def average_time(map_name):
 
     plt.bar(['Greedy', 'A*'], [mean_greedy, mean_a_star], color=['blue', 'orange'])
     plt.errorbar(['Greedy', 'A*'], [mean_greedy, mean_a_star], yerr=[std_greedy, std_a_star], fmt='o', color='black')
+    plt.ylim(bottom=0)
     plt.ylabel('Tiempo de Ejecucion (ms)')
     plt.title(f'Tiempo de Ejecucion para el Mapa {map_name[:-4]}')
     #plt.savefig(f'{graphs_folder}average_time_{map_name[:-4]}.png')
@@ -134,6 +133,7 @@ def average_frontier_nodes(map_name):
 
     plt.bar(['Greedy', 'A*'], [mean_greedy, mean_a_star], color=['blue', 'orange'])
     plt.errorbar(['Greedy', 'A*'], [mean_greedy, mean_a_star], yerr=[std_greedy, std_a_star], fmt='o', color='black')
+    plt.ylim(bottom=0)
     plt.ylabel('Nodos Frontera')
     plt.title(f'Cantidad Promedio de Nodos Frontera para el Mapa {map_name[:-4]}')
     #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
@@ -154,6 +154,7 @@ def average_explored_nodes(map_name):
 
     plt.bar(['Greedy', 'A*'], [mean_greedy, mean_a_star], color=['blue', 'orange'])
     plt.errorbar(['Greedy', 'A*'], [mean_greedy, mean_a_star], yerr=[std_greedy, std_a_star], fmt='o', color='black')
+    plt.ylim(bottom=0)
     plt.ylabel('Nodos Explorados')
     plt.title(f'Cantidad Promedio de Nodos Explorados para el Mapa {map_name[:-4]}')
     #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
@@ -192,6 +193,7 @@ def greedy_vs_a_star_frontier_nodes_all():
     ax.set_ylabel('Nodos Frontera')
     ax.set_title('Cantidad Promedio de Nodos Frontera para Cada Mapa')
     ax.legend()
+    plt.ylim(bottom=0)
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
     plt.show()
@@ -230,6 +232,7 @@ def greedy_vs_a_star_exp_nodes_all():
     ax.set_ylabel('Nodos Explorados')
     ax.set_title('Cantidad Promedio de Nodos Explorados para Cada Mapa')
     ax.legend()
+    plt.ylim(bottom=0)
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
     plt.show()
@@ -305,6 +308,7 @@ def path_len_greed_vs_a_star():
     ax.set_ylabel('Longitud del camino')
     ax.set_title('Longitud del Camino para cada Mapa')
     ax.legend()
+    plt.ylim(bottom=0)
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}path_len_maps.png')
     plt.show()
@@ -322,12 +326,8 @@ def avg_running_time():
     print(f'Tiempo de ejecucion promedio para A*: {a_star_time} error: {df_a_star_mean.std()}')
 
 def main():
-    run_a_10_times()
-    run_g_10_times()
-    run_a_10_times()
-    run_g_10_times()
-    run_a_10_times()
-    run_g_10_times()
+    #run_a_10_times()
+    #run_g_10_times()
 
     average_time('Dificil.txt')
     average_frontier_nodes('Dificil.txt')
