@@ -381,18 +381,6 @@ def valid_corral(state,corral,goals):
     
     return False
 
-#def valid_corral(state,corral,game):
-#
-#    goals_in_corral = 0
-#    for goal in game.goals:
-#        if inside_corral(corral, goal):
-#            goals_in_corral += 1
-#
-#    if goals_in_corral == len(state.boxes):
-#        return True
-#    
-#    return False
-
     
 def is_corral_goal(state, game,corral,deleted_boxes,walls,goals):
 

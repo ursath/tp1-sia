@@ -115,8 +115,8 @@ if __name__ == "__main__":
     valid_box_positions = load_all_playable_positions_for_boxes(game.goals, game.walls)
     #moves = uninformed_search_algorithm(game.walls,game.goals, game.current_state, is_goal, get_children, None, "bfs")
     #moves = get_greedy(data_map, "manhattan_with_corral_deadlock_detection", valid_box_positions)
-    moves = get_astar(data_map, "manhattan_distance", valid_box_positions)
-    game.moves = moves
-    #game.moves = moves['directions']
+    moves = get_astar(data_map, "manhattan_with_corral_deadlock_detection", valid_box_positions)
+    #game.moves = moves
+    game.moves = moves['directions']
     print(moves)
     arcade.run()
