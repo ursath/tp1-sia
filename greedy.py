@@ -44,10 +44,10 @@ class Greedy:
 
             if current_state.is_goal():
                 f = open("data/stats.csv","a")
-                line = f"{self.map.name},Greedy,{self.heuristics.__class__.__name__},{time.time() - answer['execution_time']},{len(self.explored)},{len(self.priority_queue)},{len(self.get_path(current_state)[0])}\n"
+                line = f"{self.map.name},Greedy,{self.heuristics.__class__.__name__},{(time.time() - answer['execution_time']) * 1000},{len(self.explored)},{len(self.priority_queue)},{len(self.get_path(current_state)[0])}\n"
                 f.write(line)
                 f.close()
-                answer['execution_time'] = time.time() - answer['execution_time']
+                answer['execution_time'] = (time.time() - answer['execution_time']) * 1000 
                 answer['path'] = self.get_path(current_state)[0]
                 answer['directions'] = self.get_path(current_state)[1]
                 answer['explored'] = len(self.explored) 
@@ -79,7 +79,7 @@ class Greedy:
                     self.parent[new_state] = (current_state, direction)
 
         print("No path found.")
-        answer['execution_time'] = time.time() - answer['execution_time']
+        answer['execution_time'] = (time.time() - answer['execution_time']) * 1000
         answer['path'] = []
         answer['directions'] = []
         answer['explored'] = len(self.explored)

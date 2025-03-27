@@ -15,6 +15,70 @@ if not os.path.exists(filename):
         file.write('map,algorithm,heuristic,execution_time,explored,frontier,path_length\n')
 file = open(filename, 'a')
 
+def exp_nodes_by_heuristic(map_name, algorithm):
+    df = pd.read_csv(filename)
+    df['explored'] = pd.to_numeric(df['explored'])
+    df['heuristic'] = df['heuristic'].astype(str)
+
+    df = df[(df['map'] == map_name) & (df['algorithm'] == algorithm)]
+
+    df_manhattan = df[df['heuristic'] == 'ManhattanDistance']
+    df_manhattan_improved = df[df['heuristic'] == 'ManhattanImproved']
+    df_player_distance = df[df['heuristic'] == 'PlayerDistance']
+    df_combined = df[df['heuristic'] == 'CombinedHeuristic']
+
+    man_avg = df_manhattan['explored'].mean()
+    man_std = df_manhattan['explored'].std()
+
+    man_imp_avg = df_manhattan_improved['explored'].mean()
+    man_imp_std = df_manhattan_improved['explored'].std()
+
+    player_avg = df_player_distance['explored'].mean()
+    player_std = df_player_distance['explored'].std()
+
+    combined_avg = df_combined['explored'].mean()
+    combined_std = df_combined['explored'].std()
+
+    plt.bar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada'], [man_avg, man_imp_avg, player_avg, combined_avg], color=['blue', 'orange', 'green', 'red'])
+    plt.errorbar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada'], [man_avg, man_imp_avg, player_avg, combined_avg], yerr=[man_std, man_imp_std, player_avg, combined_std], fmt='o', color='black')
+    plt.ylabel('Nodos Expandidos')
+    plt.xticks(rotation=45)
+    plt.title(f'Nodos Expandidos para el Mapa {map_name[:-4]} y el algoritmo {algorithm}')
+    #plt.savefig(f'{graphs_folder}exp_nodes_{map_name[:-4]}_{algorithm}.png')
+    plt.show()
+
+## camino optimo segun heurisitca para greedy
+def optimal_path_by_heuristic(map_name):
+    df = pd.read_csv(filename)
+    df = df[(df['map'] == map_name) & (df['algorithm'] == 'Greedy')]
+
+
+    df_manhattan = df[df['heuristic'] == 'ManhattanDistance']
+    df_manhattan_improved = df[df['heuristic'] == 'ManhattanImproved']
+    df_player_distance = df[df['heuristic'] == 'PlayerDistance']
+    df_combined = df[df['heuristic'] == 'CombinedHeuristic']
+
+    path_manhattan = df_manhattan['path_length'].mean()
+    path_manhattan_avg = df_manhattan['path_length'].std()
+
+    path_manhattan_improved = df_manhattan_improved['path_length'].mean()
+    path_manhattan_improved_avg = df_manhattan_improved['path_length'].std()
+
+    path_player_distance = df_player_distance['path_length'].mean()
+    path_player_distance_avg = df_player_distance['path_length'].std()
+
+    path_combined = df_combined['path_length'].mean()
+    path_combined_avg = df_combined['path_length'].std()
+
+    plt.bar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada'], [path_manhattan, path_manhattan_improved, path_player_distance, path_combined], color=['blue', 'orange', 'green', 'red'])
+    plt.errorbar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada'], [path_manhattan, path_manhattan_improved, path_player_distance, path_combined], yerr=[path_manhattan_avg, path_manhattan_improved_avg, path_player_distance_avg, path_combined_avg], fmt='o', color='black')
+    plt.xticks(rotation=45)
+    plt.ylabel('Longitud del camino')
+    plt.title(f'Longitud del camino optimo para el Mapa {map_name[:-4]} y el algoritmo Greedy')
+    #plt.savefig(f'{graphs_folder}optimal_path_{map_name[:-4]}.png')
+    plt.show()
+
+
 # Tiempo promedio en n iteraciones de x algoritmo
 def average_time(map_name):
     df = pd.read_csv(filename)
@@ -29,10 +93,12 @@ def average_time(map_name):
     mean_a_star = df_a_star.get_group(map_name)['execution_time_ms'].mean()
     std_a_star = df_a_star.get_group(map_name)['execution_time_ms'].std()
 
+    print(f"Greedy: {mean_greedy} std: {std_greedy}")
+
     plt.bar(['Greedy', 'A*'], [mean_greedy, mean_a_star], color=['blue', 'orange'])
     plt.errorbar(['Greedy', 'A*'], [mean_greedy, mean_a_star], yerr=[std_greedy, std_a_star], fmt='o', color='black')
-    plt.ylabel('Execution Time (ms)')
-    plt.title(f'Average Execution Time for Map {map_name[:-4]}')
+    plt.ylabel('Tiempo de Ejecucion (ms)')
+    plt.title(f'Tiempo de Ejecucion para el Mapa {map_name[:-4]}')
     #plt.savefig(f'{graphs_folder}average_time_{map_name[:-4]}.png')
     plt.show()
     
@@ -52,8 +118,8 @@ def average_frontier_nodes(map_name):
 
     plt.bar(['Greedy', 'A*'], [mean_greedy, mean_a_star], color=['blue', 'orange'])
     plt.errorbar(['Greedy', 'A*'], [mean_greedy, mean_a_star], yerr=[std_greedy, std_a_star], fmt='o', color='black')
-    plt.ylabel('Frontier Nodes')
-    plt.title(f'Average Frontier Nodes for Map {map_name[:-4]}')
+    plt.ylabel('Nodos Frontera')
+    plt.title(f'Cantidad Promedio de Nodos Frontera para el Mapa {map_name[:-4]}')
     #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
     plt.show()
 
@@ -87,8 +153,8 @@ def greedy_vs_a_star_frontier_nodes_all():
 
     ax.set_xticks(x)
     ax.set_xticklabels(maps, rotation=45)
-    ax.set_ylabel('Frontier nodes')
-    ax.set_title('Frontier Nodes for Each Map')
+    ax.set_ylabel('Nodos Frontera')
+    ax.set_title('Cantidad Promedio de Nodos Frontera para Cada Mapa')
     ax.legend()
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
@@ -125,8 +191,8 @@ def greedy_vs_a_star_exp_nodes(map_name):
 
     ax.set_xticks(x)
     ax.set_xticklabels(maps, rotation=45)
-    ax.set_ylabel('Explored nodes')
-    ax.set_title('Explored Nodes for Each Map')
+    ax.set_ylabel('Nodos Explorados')
+    ax.set_title('Nodos Explorados para cada Mapas')
     ax.legend()
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}explored_nodes_maps_all.png')
@@ -164,8 +230,8 @@ def greedy_vs_a_star_time():
 
     ax.set_xticks(x)
     ax.set_xticklabels(maps, rotation=45)
-    ax.set_ylabel('Execution Time (ms)')
-    ax.set_title('Execution Time for Each Map')
+    ax.set_ylabel('Tiempo de Ejecucion (ms)')
+    ax.set_title('Tiempo de Ejecucion Promedio para cada Mapa')
     ax.legend()
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}execution_time_maps.png')
@@ -207,17 +273,34 @@ def path_len_greed_vs_a_star():
     #plt.savefig(f'{graphs_folder}path_len_maps.png')
     plt.show()
 
+def avg_running_time():
+    df = pd.read_csv(filename)
+
+    df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['execution_time'].mean()
+    df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['execution_time'].mean()
+
+    greedy_time = df_greedy_mean.mean()
+    a_star_time = df_a_star_mean.mean()
+
+    print(f'Tiempo de ejecucion promedio para Greedy: {greedy_time} error: {df_greedy_mean.std()}')
+    print(f'Tiempo de ejecucion promedio para A*: {a_star_time} error: {df_a_star_mean.std()}')
 
 def main():
-    run_a_10_times()
-    run_g_10_times()
+    # run_a_10_times()
+    # run_g_10_times()
 
-    # average_time('1.txt')
-    # average_frontier_nodes('1.txt')
-    # greedy_vs_a_star_exp_nodes('1.txt')
+    # average_time('6.txt')
+    # average_frontier_nodes('6.txt')
+    # greedy_vs_a_star_exp_nodes('6.txt') # Fix
     # greedy_vs_a_star_frontier_nodes_all()
-    #greedy_vs_a_star_time()
-    path_len_greed_vs_a_star()
+    # greedy_vs_a_star_time() # Fix
+    # path_len_greed_vs_a_star()
+    # avg_running_time()
+
+    # exp_nodes_by_heuristic('1.txt', 'Greedy')
+    # exp_nodes_by_heuristic('1.txt', 'A*')
+
+    # optimal_path_by_heuristic('6.txt')
 
 if __name__ == "__main__":
     main()
