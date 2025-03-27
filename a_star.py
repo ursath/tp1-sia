@@ -149,8 +149,8 @@ def run_a_10_times():
         manhattan_improved = ManhattanImproved(map.targets)
         player_distance = PlayerDistance(map.targets)
         combined_heuristic = CombinedHeuristic(map.targets)
-        manhattan_distance_deadlock = ManhattanDistanceWithDeadlockDetection(map.targets)
-        combined_heuristic_deadlock = CombinedHeuristicWithDeadlockDetection(map.targets)
+        manhattan_with_deadlock_detection = ManhattanDistanceWithDeadlockDetection(map.targets)
+        combined_heuristic_with_deadlock_detection = CombinedHeuristicWithDeadlockDetection(map.targets)
 
         initial_state = State(map.boxes, map.player, map.targets)
         print("AStar - Manhattan Distance")
@@ -175,16 +175,15 @@ def run_a_10_times():
         answer = execute_a(a_star_combined)
         write_output("AStar_combined", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
 
-        print("AStar - Manhattan Distance With Deadlock Detection")
-        a_star_manhattan_deadlock = A_star(initial_state, manhattan_distance_deadlock, map, valid_box_positions)
-        answer = execute_a(a_star_manhattan_deadlock)
+        print("AStar - Manhattan With Deadlock Detection")
+        a_star_manhattan_with_deadlock = A_star(initial_state, manhattan_with_deadlock_detection, map, valid_box_positions)
+        answer = execute_a(a_star_manhattan_with_deadlock)
         write_output("AStar_manhattan_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
 
         print("AStar - Combined With Deadlock Detection")
-        a_star_combined_deadlock = A_star(initial_state, combined_heuristic_deadlock, map, valid_box_positions)
-        answer = execute_a(a_star_combined_deadlock)
+        a_star_combined_with_deadlock = A_star(initial_state, combined_heuristic_with_deadlock_detection, map, valid_box_positions)
+        answer = execute_a(a_star_combined_with_deadlock)
         write_output("AStar_combined_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
-
 
 class MapInfo:
     def __init__(self, map, name):
