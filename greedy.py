@@ -1,6 +1,6 @@
 import heapq
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection,ManhattanDistanceWithCorralDeadlockDetection
-from a_star import A_star, State, MapInfo
+from a_star import State
 from deadlocks import load_all_playable_positions_for_boxes
 import time
 import os 
