@@ -1,5 +1,9 @@
 import time
 from functools import partial
+from a_star import MapInfo
+import os
+from generate_outputs import write_output, write_output_for_visualization
+
 class Uninformed_State:
     def __init__(self, boxes, player, move = None):
         self.boxes = boxes
@@ -39,7 +43,7 @@ class Node:
             current_node= current_node.parent
         return list(reversed(path))          
 
-def uninformed_search_algorithm(walls,goals, initial_state, is_goal, get_children, sorting_criteria=None, method="bfs"):
+def uninformed_search_algorithm(map_name, goals, walls, initial_state, is_goal, get_children, sorting_criteria=None, method="bfs"):
     start_time = time.time()
     # 4: Crear Tr, Fr, Exp vacíos
     # Tr se representa implícitamente mediante los enlaces padre en los nodos
@@ -68,8 +72,8 @@ def uninformed_search_algorithm(walls,goals, initial_state, is_goal, get_childre
         # 8-10: if n Goal then return solución
         if is_goal(current_node.state, goals):
             end_time = time.time()
-            write_output(method, "Éxito", current_node, iteration, len(frontier), (end_time - start_time) * 1000)
-            write_output_for_visualization(method, current_node)
+            write_output(method, "Éxito", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost, True)
+            write_output_for_visualization(map_name,method, (end_time - start_time) * 1000, explored, frontier, iteration)
             return current_node.get_moves()
 
         # 14: n → Exp
@@ -103,10 +107,10 @@ def uninformed_search_algorithm(walls,goals, initial_state, is_goal, get_childre
     
     # 17-19: if Solución vacía then No existe solución
     end_time = time.time()
-    write_output(method, "Fracaso", current_node, iteration, len(frontier), (end_time - start_time) * 1000)
+    write_output(method, "Fracaso", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost, True)
     return None
 
-def get_children(current_node, game):
+def get_children(current_node, walls):
     # starts where the player is located in the current state
     starting_point = current_node.state.player
     last_state = current_node.state
@@ -115,13 +119,13 @@ def get_children(current_node, game):
 
     for direction in directions:
         current_position = [starting_point[0] + direction[0], starting_point[1] + direction[1]]
-        if check_limits([starting_point[0] + direction[0], starting_point[1] + direction[1]], game, last_state, direction):
+        if check_limits([starting_point[0] + direction[0], starting_point[1] + direction[1]], walls, last_state, direction):
             new_boxes = last_state.boxes.copy()
             boxed_moved = False
             current_position_tuple = tuple(current_position)
             if current_position_tuple in last_state.boxes:
                 box = ([current_position[0] + direction[0], current_position[1] + direction[1]])
-                if not check_limits(box, game, last_state, direction):
+                if not check_limits(box, walls, last_state, direction):
                     continue
                 boxed_moved = True
                 new_boxes.remove(current_position_tuple)
@@ -136,15 +140,14 @@ def get_children(current_node, game):
 
 def is_goal(state, goals):
     for box_position in state.boxes:
-        if tuple(box_position) not in goals:
+        if box_position not in goals:
             return False
 
     return True
 
 # making sure that the next position is not occupied by a wall or a stucked box
-def check_limits(coordinates, game, last_state, direction):
-    #if coordinates in game:
-    if tuple(coordinates) in game:
+def check_limits(coordinates, walls, last_state, direction):
+    if coordinates in walls:
         return False
     if coordinates in last_state.boxes:
         if is_blocked_box_for_direction(coordinates, last_state, direction):
@@ -161,33 +164,22 @@ def is_blocked_box_for_direction(coordinates, last_state, direction):
         return True
     return False
 
-def write_output(method, result, current_node, iteration, frontier_len, time):
-    with open(f'{method}_results.txt', 'w') as file:
-        file.write(f"Resultado: {result}\n")
-        file.write(f"Costo: {current_node.cost}\n")
-        file.write(f"Cantidad de Nodos Expandidos: {iteration}\n")
-        file.write(f"Cantidad de Nodos Frontera: {iteration + frontier_len}\n")
-        file.write(f"Solución:\n")
-        for node in current_node.get_path():
-            file.write(f"Paso {node.depth}:\n")
-            file.write("Estado:\n")
-            file.write(f"*  Posición del jugador: ({node.state.player[0]}, {node.state.player[1]})\n")
-            file.write(f"*  Posición de las cajas: [")
-            last_index = len(node.state.boxes)-1
-            for index in range(last_index):
-                file.write(f"({node.state.boxes[index][0]}, {node.state.boxes[index][1]}),")
-            file.write(f"({node.state.boxes[last_index][0]}, {node.state.boxes[last_index][1]})]\n")
-            push_status = "Si" if node.boxed_moved else "No"
-            file.write(f"*  Empuje: {push_status}\n")
-            if node.parent:
-                file.write(f"Movimiento previo: {node.action}\n\n")
-            else:
-                file.write(f"\n")
-        file.write(f"Tiempo de procesamiento: {time} ms\n")
+def load_map(map_file):
+    with open(map_file, "r") as f:
+        return [list(line.strip()) for line in f.readlines()]
 
-def write_output_for_visualization(method, current_node):
-    with open(f'{method}_visualization.txt', 'w') as file:
-        file.write(str(current_node.get_moves()))
+def run_uninformative_search(method="bfs"):
+    if 'stats.csv' not in os.listdir('data'):
+        file = open('data/stats.csv', 'w')
+        file.write('map,algorithm,heuristic,execution_time,explored,frontier,path_length\n')
+        file.close()
+        maps = []
+
+    for m in os.listdir('maps'):
+        maps.append(MapInfo(load_map(f"maps/{m}"), m))
+        map = MapInfo(load_map(f"maps/{m}"), m)
+        initial_state = Uninformed_State(map.boxes, map.player)
+        uninformed_search_algorithm(map.targets, map.walls, initial_state, is_goal, get_children, None, method)
 
 # For deadlocks -> move to heuristics
 def load_all_playable_positions_for_boxes(goals, walls):
@@ -197,8 +189,8 @@ def load_all_playable_positions_for_boxes(goals, walls):
     for goal in goals:
         # Create a set to track explored positions during pulling
         explored = []
-        frontier = [goal]
-        explored.append(goal)
+        frontier = [[goal[0], goal[1]]]
+        explored.append([goal[0], goal[1]])
         
         # Directions for pulling (opposite of pushing)
         directions = [
@@ -207,6 +199,10 @@ def load_all_playable_positions_for_boxes(goals, walls):
             [0, 1],   # Right to Left
             [0, -1]   # Left to Right
         ]
+
+        wall_list = []
+        for wall in walls:
+            wall_list.append([wall[0],wall[1]])
         
         # Breadth-first search to pull the box
         while frontier:
@@ -230,8 +226,8 @@ def load_all_playable_positions_for_boxes(goals, walls):
                 # 1. Box position is not a wall
                 # 2. Player position is not a wall
                 # 3. Box position hasn't been explored before
-                if (box_position not in walls and 
-                    player_position not in walls and 
+                if (box_position not in wall_list and
+                    player_position not in wall_list and 
                     box_position not in explored):
                     
                     # Mark this position as explored and add to frontier
@@ -488,156 +484,3 @@ def get_reachable_positions(walls,state):
     return reachable_positions
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-#
-#def check_corral_deadlock(game,state,box_moved):
-#
-#    reachable_positions = []
-#    reachable_positions = get_reachable_positions(game,state)
-#
-#    # With the reachable positions, we can get the area the player cannot reach (corral)
-#    corral = []
-#    corral = get_corral(reachable_positions, game,state)
-#
-#    if not box_moved:
-#        return False
-#
-#    if not corral:
-#        return False
-#
-#    # Then delete the boxes that are not in the corral, so we can check if the corral is a deadlock 
-#    deleted_boxes_state, deleted_boxes = delete_boxes(corral,state,game)
-#
-#    if not valid_corral(deleted_boxes_state,corral,game):
-#        return True
-#
-#    # Try to get all the boxes in the corral to a goal
-#    new_is_goal = partial(is_corral_goal, corral=corral,deleted_boxes=deleted_boxes)
-#
-#    
-#    corral_solution = uninformed_search_algorithm(game, deleted_boxes_state, new_is_goal, get_children, None, "bfs")
-#
-#    # If there is no solution, then the corral is a deadlock
-#    # If any of the boxes in the corral is freezed, then the corral is a deadlock
-#    if corral_solution == None:
-#        return True
-#    
-#    # If there is a partial solution, then we need to place the boxes we deleted before
-#    # If any box exited the corral, then the corral was not a deadlock
-#    else:
-#        return False        
-#    
-#
-#
-#def valid_corral(state,corral,game):
-#
-#    goals_in_corral = 0
-#    for goal in game.goals:
-#        if inside_corral(corral, goal):
-#            goals_in_corral += 1
-#
-#    if goals_in_corral == len(state.boxes):
-#        return True
-#    
-#    return False
-#
-#    
-#def is_corral_goal(state, game,corral,deleted_boxes):
-#
-#    if any_box_exit_corral(state, game,corral):
-#        return True
-#    
-#    boxes_placed = 0
-#    for box in state.boxes:
-#        if box in game.goals:
-#            boxes_placed += 1
-#
-#    # If all the boxes inside the corral are placed in a goal, then we have to place the boxes deleted before
-#    if boxes_placed == len(state.boxes):
-#        for box in deleted_boxes:
-#            state.boxes.append(box)
-#        
-#        uninformed_search_algorithm(game, state, is_goal, get_children, None, "dfs")
-#
-#    return False
-#
-#def any_box_exit_corral(state, game,corral):
-#
-#    for box in state.boxes:
-#        if not inside_corral(corral, box):
-#            return True
-#
-#    return False
-#
-#
-#
-#def inside_corral(corral, box):
-#    for position in corral:
-#        if box[0] == position[0] and box[1] == position[1]:
-#            return True
-#    return False
-#
-#
-#def get_corral(reachable_positions, game, state):
-#    corral = set()
-#    for row in range(0, len(game.map_data)):
-#        for col in range(0, len(game.map_data[0])):
-#            if tuple([row,col]) not in reachable_positions and [row,col] not in game.walls and [row,col] not in state.boxes:
-#                corral.add(tuple([row,col]))
-#    
-#    return get_adyacent(corral,game)
-#
-#
-#def get_adyacent(reachable_positions,game):
-#    corral = set(reachable_positions)
-#    directions= [[- 1, 0], [0, 1], [1, 0], [0, -1]]
-#
-#    for x,y in reachable_positions:
-#        for dx,dy in directions:
-#            if (x+dx,y+dy) not in reachable_positions and (x+dx,y+dy) not in game.walls:
-#                corral.add((x+dx,y+dy))
-#
-#    return corral
-#
-#
-#def get_reachable_positions(game,state):
-#
-#    frontier = []
-#    reachable_positions = []
-#
-#    initial_node = Node(state)
-#    frontier.append(initial_node)
-#
-#    while frontier:
-#        for frontier_node in frontier:
-#            for move, child_state, cost, boxed_moved, depth in get_children(frontier_node, game):
-#            
-#                if boxed_moved:
-#                    continue
-#
-#                child_node = Node(child_state, frontier_node, move, cost, boxed_moved, depth)
-#                
-#                if any(n.state.player == child_state.player for n in frontier):
-#                    continue
-#
-#                if tuple(child_state.player) not in reachable_positions:
-#                    frontier.append(child_node)
-#    
-#            reachable_positions.append(tuple(frontier_node.state.player))
-#            frontier.remove(frontier_node)
-#            array = []
-#            for f in frontier:
-#                array.append(f.state.player)
-#    
-#    return reachable_positions
