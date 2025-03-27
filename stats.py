@@ -1,5 +1,6 @@
 from a_star import run_a_10_times
 from greedy import run_g_10_times
+from game_solver import run_uninformative_search
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection
 import os
 from matplotlib import pyplot as plt
@@ -328,6 +329,8 @@ def main():
     run_g_10_times()
     run_a_10_times()
     run_g_10_times()
+    #run_uninformative_search("dfs")
+    #run_uninformative_search("bfs")
 
     average_time('Dificil.txt')
     average_frontier_nodes('Dificil.txt')

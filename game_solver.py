@@ -1,6 +1,6 @@
 import time
 from functools import partial
-from a_star import MapInfo
+from map import MapInfo
 import os
 from generate_outputs import write_output, write_output_for_visualization
 
@@ -147,7 +147,7 @@ def is_goal(state, goals):
 
 # making sure that the next position is not occupied by a wall or a stucked box
 def check_limits(coordinates, walls, last_state, direction):
-    if coordinates in walls:
+    if tuple(coordinates) in walls:
         return False
     if coordinates in last_state.boxes:
         if is_blocked_box_for_direction(coordinates, last_state, direction):

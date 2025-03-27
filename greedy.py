@@ -5,6 +5,7 @@ from deadlocks import load_all_playable_positions_for_boxes
 import time
 import os 
 from generate_outputs import write_output, write_output_for_visualization
+from map import MapInfo
 
 class Greedy:
 

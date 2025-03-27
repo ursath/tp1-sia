@@ -4,6 +4,7 @@ from deadlocks import load_all_playable_positions_for_boxes
 import time
 import os
 from generate_outputs import write_output, write_output_for_visualization
+from map import MapInfo
 
 class State:
     def __init__(self, boxes, player, targets, box_moved=False):
@@ -188,15 +189,6 @@ def run_a_10_times():
         a_star_combined_with_deadlock = A_star(initial_state, combined_heuristic_with_deadlock_detection, map, valid_box_positions)
         answer = execute_a(a_star_combined_with_deadlock)
         write_output("AStar_combined_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
-
-class MapInfo:
-    def __init__(self, map, name):
-        self.map = map
-        self.name = name
-        self.targets = {(x, y) for x, row in enumerate(map) for y, cell in enumerate(row) if cell == "."}
-        self.boxes = {(x, y) for x, row in enumerate(map) for y, cell in enumerate(row) if cell == "$"}
-        self.player = next((x, y) for x, row in enumerate(map) for y, cell in enumerate(row) if cell == "@")
-        self.walls = {(x, y) for x, row in enumerate(map) for y, cell in enumerate(row) if cell == "#"}
 
 def load_map(map_file):
     with open(map_file, "r") as f:
