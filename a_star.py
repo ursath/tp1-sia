@@ -72,7 +72,7 @@ class A_star:
 
             if current_state.is_goal():
                 f = open("data/stats.csv","a")
-                line = f"{self.map.name},A*,{self.heuristics.__class__.__name__},{(time.time() - answer['execution_time']) * 1000},{len(self.explored)},{len(self.priority_queue)},{len(self.get_path(current_state)[0])}\n"
+                line = f"{self.map.name},A*,{self.heuristics.__class__.__name__},{(time.time() - answer['execution_time']) * 1000},{len(self.explored)},{len(self.priority_queue) + len(self.explored)},{len(self.get_path(current_state)[0])}\n"
                 f.write(line)
                 f.close()
 
