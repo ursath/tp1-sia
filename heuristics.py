@@ -1,9 +1,11 @@
 from scipy.optimize import linear_sum_assignment
 from game_solver import check_simple_deadlock_for_boxes
+from game_solver import check_corral_deadlock
 
 class HeuristicBase:
-    def __init__(self, goals):
+    def __init__(self, goals,walls=None):
         self.goals = goals
+        self.walls = walls
 
 # La heurística de Manhattan consiste en la suma de las distancias de cada bloque a su objetivo más cercano
 # No considera obstaculos
@@ -19,7 +21,7 @@ class ManhattanDistance(HeuristicBase):
     
 class ManhattanDistanceWithDeadlockDetection(ManhattanDistance):
     def get(self, boxes, valid_boxes):
-        if check_simple_deadlock_for_boxes(boxes, valid_boxes):
+        if check_simple_deadlock_for_boxes(boxes, valid_boxes) :
             return float('inf')
         return super.get(boxes)
 
@@ -60,5 +62,11 @@ class CombinedHeuristicWithDeadlockDetection(HeuristicBase):
         if check_simple_deadlock_for_boxes(boxes, valid_boxes):
             return float('inf')
         return CombinedHeuristic(self.goals).get(boxes, player)
+    
+class ManhattanDistanceWithCorralDeadlockDetection(HeuristicBase):
+    def get(self, boxes,player, valid_boxes,box_moved):
+        if check_corral_deadlock(self.walls,self.goals,player,list(boxes),box_moved,valid_boxes):
+            return float('inf')
+        return ManhattanDistance(self.goals).get(boxes)
 
         

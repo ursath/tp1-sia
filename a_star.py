@@ -1,14 +1,15 @@
 import heapq
-from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection
+from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection, ManhattanDistanceWithCorralDeadlockDetection
 from game_solver import load_all_playable_positions_for_boxes
 import time
 import os
 
 class State:
-    def __init__(self, boxes, player, targets):
+    def __init__(self, boxes, player, targets, box_moved=False):
         self.boxes = frozenset(boxes) 
         self.player = player
         self.targets = frozenset(targets)
+        self.box_moved = box_moved
 
     def __hash__(self):
         return hash((self.boxes, self.player))  
@@ -24,7 +25,7 @@ class State:
 
     def move(self, direction, map):
         new_player_pos = (self.player[0] + direction[0], self.player[1] + direction[1])
-
+        box_moved = False
         # Check wall
         if new_player_pos in map.walls:
             return None
@@ -36,9 +37,10 @@ class State:
             if new_box_pos in map.walls or new_box_pos in self.boxes:
                 # Avoids moving boxes into walls or into other boxes
                 return None
+            box_moved = True
             new_boxes.remove(new_player_pos)
             new_boxes.add(new_box_pos)
-        return State(frozenset(new_boxes), new_player_pos, self.targets)
+        return State(frozenset(new_boxes), new_player_pos, self.targets, box_moved)
 
     def is_goal(self):
         return self.boxes == self.targets
@@ -99,6 +101,8 @@ class A_star:
                         f_n = new_g_n + self.heuristics.get(new_state.boxes, self.valid_box_positions)
                     elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
                         f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player, self.valid_box_positions)
+                    elif isinstance(self.heuristics, (ManhattanDistanceWithCorralDeadlockDetection)):
+                        f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player, self.valid_box_positions, new_state.box_moved)
                     else:
                         # PlayerDistance or CombinedHeuristic take boxes and player
                         f_n = new_g_n + self.heuristics.get(new_state.boxes, new_state.player)
@@ -199,6 +203,7 @@ def get_astar(data_map, heuristic, valid_box_positions):
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
     manhattan_with_deadlock_detection = ManhattanDistanceWithDeadlockDetection(map.targets)
+    manhattam_with_corral_deadlock_detection = ManhattanDistanceWithCorralDeadlockDetection(map.targets,map.walls)
     player_distance = PlayerDistance(map.targets)
     combined_heuristic = CombinedHeuristic(map.targets)
     combined_heuristic_with_deadlock_detection = CombinedHeuristicWithDeadlockDetection(map.targets)
@@ -234,3 +239,8 @@ def get_astar(data_map, heuristic, valid_box_positions):
         print("AStar - Combined With Deadlock Detection")
         a_star_combined_deadlock = A_star(initial_state, combined_heuristic_with_deadlock_detection , map, valid_box_positions)
         return execute_a(a_star_combined_deadlock)
+    
+    if heuristic == "manhattan_with_corral_deadlock_detection":
+        print("AStar - Manhattan With Corral Deadlock Detection")
+        a_star_manhattan_corral_deadlock = A_star(initial_state, manhattam_with_corral_deadlock_detection, map, valid_box_positions)
+        return execute_a(a_star_manhattan_corral_deadlock)

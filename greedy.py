@@ -1,5 +1,5 @@
 import heapq
-from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection
+from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection,ManhattanDistanceWithCorralDeadlockDetection
 from a_star import A_star, State, MapInfo
 from game_solver import load_all_playable_positions_for_boxes
 import time
@@ -7,7 +7,7 @@ import os
 
 class Greedy:
 
-    def __init__(self, initial_state, heuristics, map, valid_box_positions):
+    def __init__(self, initial_state, heuristics, map, valid_box_positions,box_moved=False):
         self.initial_state = initial_state
         self.heuristics = heuristics
         self.explored = set()
@@ -17,6 +17,7 @@ class Greedy:
         self.best_heuristic = {}
         self.frontier = set()
         self.valid_box_positions = valid_box_positions
+        self.box_moved = box_moved
 
     def search(self):
 
@@ -31,6 +32,8 @@ class Greedy:
             h_n = self.heuristics.get(self.initial_state.boxes, self.valid_box_positions)
         elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
             h_n = self.heuristics.get(self.initial_state.boxes, self.initial_state.player, self.valid_box_positions)
+        elif isinstance(self.heuristics, (ManhattanDistanceWithCorralDeadlockDetection)):
+            h_n = self.heuristics.get(self.initial_state.boxes, self.initial_state.player, self.valid_box_positions, self.initial_state.box_moved)
         else:
             # PlayerDistance or CombinedHeuristic take boxes and player
             h_n = self.heuristics.get(self.initial_state.boxes, self.initial_state.player)
@@ -67,6 +70,8 @@ class Greedy:
                     h_n = self.heuristics.get(new_state.boxes, self.valid_box_positions)
                 elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
                     h_n = self.heuristics.get(new_state.boxes, new_state.player, self.valid_box_positions)
+                elif isinstance(self.heuristics, (ManhattanDistanceWithCorralDeadlockDetection)):
+                    h_n = self.heuristics.get(new_state.boxes, new_state.player, self.valid_box_positions, self.box_moved)
                 else:
                     # PlayerDistance or CombinedHeuristic take boxes and player
                     h_n = self.heuristics.get(new_state.boxes, new_state.player)
@@ -116,11 +121,12 @@ def execute_g(greedy):
     return answer
 
 def get_greedy(data_map, heuristic, valid_box_positions):
-    map = MapInfo(load_map(data_map))
+    map = MapInfo(load_map(data_map),"")
 
     manhattan_distance = ManhattanDistance(map.targets)
     manhattan_improved = ManhattanImproved(map.targets)
     manhattan_with_deadlock_detection = ManhattanDistanceWithDeadlockDetection(map.targets)
+    manhattan_with_corral_deadlock_detection = ManhattanDistanceWithCorralDeadlockDetection(map.targets,map.walls)
     player_distance = PlayerDistance(map.targets)
     combined_heuristic = CombinedHeuristic(map.targets)
     combined_heuristic_with_deadlock_detection = CombinedHeuristicWithDeadlockDetection(map.targets)
@@ -141,6 +147,11 @@ def get_greedy(data_map, heuristic, valid_box_positions):
         print("Greedy - Manhattan With Deadlock Detection")
         greedy_manhattan_deadlock= Greedy(initial_state, manhattan_with_deadlock_detection, map, valid_box_positions)
         return execute_g(greedy_manhattan_deadlock)
+    
+    if heuristic == "manhattan_with_corral_deadlock_detection":
+        print("Greedy - Manhattan With Corral Deadlock Detection")
+        greedy_manhattan_corral_deadlock = Greedy(initial_state, manhattan_with_corral_deadlock_detection, map, valid_box_positions)
+        return execute_g(greedy_manhattan_corral_deadlock)
 
     if heuristic == "player_distance":
         print("Greedy - Player Distance")
@@ -172,6 +183,7 @@ def run_g_10_times():
     
         manhattan_distance = ManhattanDistance(map.targets)
         manhattan_improved = ManhattanImproved(map.targets)
+        manhattam_with_corral_deadlock_detection = ManhattanDistanceWithCorralDeadlockDetection(map.targets,map.walls)
         player_distance = PlayerDistance(map.targets)
         combined_heuristic = CombinedHeuristic(map.targets)
         initial_state = State(map.boxes, map.player, map.targets)
@@ -191,6 +203,10 @@ def run_g_10_times():
         print("AStar - Combined")
         greedy_combined = Greedy(initial_state, combined_heuristic, map, valid_box_positions)
         execute_g(greedy_combined)
+
+        print("AStar - Manhattan With Corral Deadlock Detection")
+        greedy_manhattan_corral_deadlock = Greedy(initial_state, manhattam_with_corral_deadlock_detection, map, valid_box_positions)
+        execute_g(greedy_manhattan_corral_deadlock)
 
 def main():
     run_g_10_times()
