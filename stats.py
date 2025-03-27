@@ -519,34 +519,34 @@ def main():
     #run_uninformative_search("bfs")
 
     # Gráficos de comparación entre bfs y dfs
-    #bfs_vs_dfs_average_time('Medio.txt')
-    #bfs_vs_dfs_average_frontier_nodes('Medio.txt')
-    #bfs_vs_dfs_average_explored_nodes('Medio.txt')
+    bfs_vs_dfs_average_time('Medio.txt')
+    bfs_vs_dfs_average_frontier_nodes('Medio.txt')
+    bfs_vs_dfs_average_explored_nodes('Medio.txt')
 
-    #bfs_vs_dfs_exp_nodes_all()
-    #bfs_vs_dfs_frontier_nodes_all()
+    bfs_vs_dfs_exp_nodes_all()
+    bfs_vs_dfs_frontier_nodes_all()
 
-    #path_len_bfs_vs_a_dfs()
+    path_len_bfs_vs_a_dfs()
 
     # Gráficos de comparación entre greedy y a*
-    #greedy_vs_astar_average_time('Dificil.txt')
-    #greedy_vs_astar_average_frontier_nodes('Dificil.txt')
-    #greedy_vs_astar_average_explored_nodes('Dificil.txt')
+    greedy_vs_astar_average_time('Dificil.txt')
+    greedy_vs_astar_average_frontier_nodes('Dificil.txt')
+    greedy_vs_astar_average_explored_nodes('Dificil.txt')
 
-    #greedy_vs_a_star_exp_nodes_all()
-    #greedy_vs_a_star_frontier_nodes_all()
+    greedy_vs_a_star_exp_nodes_all()
+    greedy_vs_a_star_frontier_nodes_all()
 
-    #path_len_greed_vs_a_star()
+    path_len_greed_vs_a_star()
 
     # Gráficos de comparación entre heurísticas
-    #exp_nodes_by_heuristic('Medio.txt', 'Greedy')
-    #exp_nodes_by_heuristic('Medio.txt', 'A*')
+    exp_nodes_by_heuristic('Medio.txt', 'Greedy')
+    exp_nodes_by_heuristic('Medio.txt', 'A*')
 
-    #optimal_path_by_heuristic('Medio.txt', 'Greedy')
-    #optimal_path_by_heuristic('Medio.txt', 'A*')
+    optimal_path_by_heuristic('Medio.txt', 'Greedy')
+    optimal_path_by_heuristic('Medio.txt', 'A*')
 
     # Gráficos de comparación entre los 4 métodos: bfs, dfs, greedy, a*
-    # path_len_all('Medio.txt')
+    path_len_all('Medio.txt')
     average_explored_vs_frontier_nodes('Medio.txt')
 
     avg_running_time()
