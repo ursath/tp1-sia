@@ -51,14 +51,14 @@ def exp_nodes_by_heuristic(map_name, algorithm):
     plt.errorbar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [man_avg, man_imp_avg, player_avg, combined_avg, man_dl_avg, combined_dl_avg], yerr=[man_std, man_imp_std, player_std, combined_std, man_dl_std, combined_dl_std], fmt='o', color='black')
     plt.ylabel('Nodos Expandidos')
     plt.xticks(rotation=45)
-    plt.title(f'Nodos Expandidos para el Mapa {map_name[:-4]} y el algoritmo {algorithm}')
+    plt.title(f'Nodos Expandidos para el Mapa {map_name[:-4]} con el algoritmo {algorithm}')
     #plt.savefig(f'{graphs_folder}exp_nodes_{map_name[:-4]}_{algorithm}.png')
     plt.show()
 
 ## camino optimo segun heurisitca para greedy
-def optimal_path_by_heuristic(map_name):
+def optimal_path_by_heuristic(map_name, method):
     df = pd.read_csv(filename)
-    df = df[(df['map'] == map_name) & (df['algorithm'] == 'Greedy')]
+    df = df[(df['map'] == map_name) & (df['algorithm'] == method)]
 
 
     df_manhattan = df[df['heuristic'] == 'ManhattanDistance']
@@ -91,7 +91,7 @@ def optimal_path_by_heuristic(map_name):
     plt.errorbar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [path_manhattan, path_manhattan_improved, path_player_distance, path_combined, man_dl_path, combined_dl_path], yerr=[path_manhattan_avg, path_manhattan_improved_avg, path_player_distance_avg, path_combined_avg, man_dl_path_std, combined_dl_path_std], fmt='o', color='black')
     plt.xticks(rotation=45)
     plt.ylabel('Longitud del camino')
-    plt.title(f'Longitud del camino optimo para el Mapa {map_name[:-4]} y el algoritmo Greedy')
+    plt.title(f'Longitud del camino optimo para el Mapa {map_name[:-4]} con el algoritmo Greedy')
     #plt.savefig(f'{graphs_folder}optimal_path_{map_name[:-4]}.png')
     plt.show()
 
@@ -139,7 +139,65 @@ def average_frontier_nodes(map_name):
     #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
     plt.show()
 
+def average_explored_nodes(map_name):
+    df = pd.read_csv(filename)
+    df['execution_time'] = pd.to_numeric(df['execution_time'])
+    df['execution_time_ms'] = df['execution_time'] 
+
+    df_greedy = df[df['algorithm'] == 'Greedy'].groupby('map')
+    df_a_star = df[df['algorithm'] == 'A*'].groupby('map')
+
+    mean_greedy = df_greedy.get_group(map_name)['explored'].mean()
+    std_greedy = df_greedy.get_group(map_name)['explored'].std()
+    mean_a_star = df_a_star.get_group(map_name)['explored'].mean()
+    std_a_star = df_a_star.get_group(map_name)['explored'].std()
+
+    plt.bar(['Greedy', 'A*'], [mean_greedy, mean_a_star], color=['blue', 'orange'])
+    plt.errorbar(['Greedy', 'A*'], [mean_greedy, mean_a_star], yerr=[std_greedy, std_a_star], fmt='o', color='black')
+    plt.ylabel('Nodos Explorados')
+    plt.title(f'Cantidad Promedio de Nodos Explorados para el Mapa {map_name[:-4]}')
+    #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
+    plt.show()
+
 def greedy_vs_a_star_frontier_nodes_all():
+    df = pd.read_csv(filename)
+    df['frontier'] = pd.to_numeric(df['frontier'])
+
+    df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['frontier'].mean()
+    df_greedy_std = df[df['algorithm'] == 'Greedy'].groupby('map')['frontier'].std()
+    df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['frontier'].mean()
+    df_a_star_std = df[df['algorithm'] == 'A*'].groupby('map')['frontier'].std()
+
+    maps = df['map'].unique()
+
+    greedy_times = [df_greedy_mean.get(map_name, 0) for map_name in maps]
+    greedy_std_dev = [df_greedy_std.get(map_name, 0) for map_name in maps]
+    a_star_times = [df_a_star_mean.get(map_name, 0) for map_name in maps]
+    a_star_std_dev = [df_a_star_std.get(map_name, 0) for map_name in maps]
+
+    x = np.arange(len(maps)) 
+    width = 0.4  # Bar width
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    bars_greedy = ax.bar(x - width/2, greedy_times, width, label='Greedy', color='blue')
+    bars_a_star = ax.bar(x + width/2, a_star_times, width, label='A*', color='orange')
+
+    # Center the error bar
+    ax.errorbar(x - width/2, greedy_times, yerr=greedy_std_dev, fmt='o', color='black', capsize=5)
+    ax.errorbar(x + width/2, a_star_times, yerr=a_star_std_dev, fmt='o', color='black', capsize=5)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(maps, rotation=45)
+    ax.set_ylabel('Nodos Frontera')
+    ax.set_title('Cantidad Promedio de Nodos Frontera para Cada Mapa')
+    ax.legend()
+    plt.tight_layout()
+    #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
+    plt.show()
+
+# Greedy vs A* en un mapa (nodos expandidos vs tamaño del mapa)
+def greedy_vs_a_star_exp_nodes_all():
     df = pd.read_csv(filename)
     df['explored'] = pd.to_numeric(df['explored'])
 
@@ -171,44 +229,6 @@ def greedy_vs_a_star_frontier_nodes_all():
     ax.set_xticklabels(maps, rotation=45)
     ax.set_ylabel('Nodos Explorados')
     ax.set_title('Cantidad Promedio de Nodos Explorados para Cada Mapa')
-    ax.legend()
-    plt.tight_layout()
-    #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
-    plt.show()
-
-# Greedy vs A* en un mapa (nodos expandidos vs tamaño del mapa)
-def greedy_vs_a_star_exp_nodes_all():
-    df = pd.read_csv(filename)
-    df['explored'] = pd.to_numeric(df['explored'])
-
-    df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['frontier'].mean()
-    df_greedy_std = df[df['algorithm'] == 'Greedy'].groupby('map')['frontier'].std()
-    df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['frontier'].mean()
-    df_a_star_std = df[df['algorithm'] == 'A*'].groupby('map')['frontier'].std()
-
-    maps = df['map'].unique()
-
-    greedy_times = [df_greedy_mean.get(map_name, 0) for map_name in maps]
-    greedy_std_dev = [df_greedy_std.get(map_name, 0) for map_name in maps]
-    a_star_times = [df_a_star_mean.get(map_name, 0) for map_name in maps]
-    a_star_std_dev = [df_a_star_std.get(map_name, 0) for map_name in maps]
-
-    x = np.arange(len(maps)) 
-    width = 0.4  # Bar width
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    bars_greedy = ax.bar(x - width/2, greedy_times, width, label='Greedy', color='blue')
-    bars_a_star = ax.bar(x + width/2, a_star_times, width, label='A*', color='orange')
-
-    # Center the error bar
-    ax.errorbar(x - width/2, greedy_times, yerr=greedy_std_dev, fmt='o', color='black', capsize=5)
-    ax.errorbar(x + width/2, a_star_times, yerr=a_star_std_dev, fmt='o', color='black', capsize=5)
-
-    ax.set_xticks(x)
-    ax.set_xticklabels(maps, rotation=45)
-    ax.set_ylabel('Nodos Frontera')
-    ax.set_title('Cantidad Promedio de Nodos Frontera para Cada Mapa')
     ax.legend()
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
@@ -282,8 +302,8 @@ def path_len_greed_vs_a_star():
 
     ax.set_xticks(x)
     ax.set_xticklabels(maps, rotation=45)
-    ax.set_ylabel('Path Length')
-    ax.set_title('Path Length for Each Map')
+    ax.set_ylabel('Longitud del camino')
+    ax.set_title('Longitud del Camino para cada Mapa')
     ax.legend()
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}path_len_maps.png')
@@ -304,21 +324,26 @@ def avg_running_time():
 def main():
     run_a_10_times()
     run_g_10_times()
+    run_a_10_times()
+    run_g_10_times()
+    run_a_10_times()
+    run_g_10_times()
 
-    average_time('6.txt')
-    average_frontier_nodes('6.txt')
+    average_time('Dificil.txt')
+    average_frontier_nodes('Dificil.txt')
+    average_explored_nodes('Dificil.txt')
 
     greedy_vs_a_star_exp_nodes_all()
-
     greedy_vs_a_star_frontier_nodes_all()
 
     path_len_greed_vs_a_star()
     avg_running_time()
 
-    exp_nodes_by_heuristic('1.txt', 'Greedy')
-    exp_nodes_by_heuristic('1.txt', 'A*')
+    exp_nodes_by_heuristic('Medio.txt', 'Greedy')
+    exp_nodes_by_heuristic('Medio.txt', 'A*')
 
-    optimal_path_by_heuristic('6.txt')
+    optimal_path_by_heuristic('Medio.txt', 'Greedy')
+    optimal_path_by_heuristic('Medio.txt', 'A*')
 
 if __name__ == "__main__":
     main()
