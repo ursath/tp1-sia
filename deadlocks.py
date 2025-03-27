@@ -1,10 +1,10 @@
-#from game_solver import Uninformed_State
-#from game_solver import Node
-#from game_solver import uninformed_search_algorithm
-#from game_solver import is_goal
-#from game_solver import get_children
+from game_solver import Uninformed_State
+from game_solver import Node
+from game_solver import uninformed_search_algorithm
+from game_solver import is_goal
+from game_solver import get_children
 
-from game_solver import *
+#from game_solver import *
 from functools import partial
 
 # For deadlocks -> move to heuristics

@@ -1,5 +1,6 @@
 from a_star import run_a_10_times
 from greedy import run_g_10_times
+from game_solver import run_uninformative_search
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection
 import os
 from matplotlib import pyplot as plt
@@ -326,8 +327,14 @@ def avg_running_time():
     print(f'Tiempo de ejecucion promedio para A*: {a_star_time} error: {df_a_star_mean.std()}')
 
 def main():
-    #run_a_10_times()
-    #run_g_10_times()
+    run_a_10_times()
+    run_g_10_times()
+    run_a_10_times()
+    run_g_10_times()
+    run_a_10_times()
+    run_g_10_times()
+    #run_uninformative_search("dfs")
+    #run_uninformative_search("bfs")
 
     average_time('Dificil.txt')
     average_frontier_nodes('Dificil.txt')

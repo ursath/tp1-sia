@@ -1,6 +1,6 @@
 import time
 from functools import partial
-from map_info import MapInfo
+from map import MapInfo
 import os
 from generate_outputs import write_output, write_output_for_visualization
 
