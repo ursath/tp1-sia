@@ -96,7 +96,26 @@ def optimal_path_by_heuristic(map_name, method):
 
 
 # Tiempo promedio en n iteraciones de x algoritmo
-def average_time(map_name):
+def bfs_vs_dfs_average_time(map_name):
+    df = pd.read_csv(filename)
+    df['execution_time'] = pd.to_numeric(df['execution_time'])
+    df['execution_time_ms'] = df['execution_time'] 
+
+    df_dfs = df[df['algorithm'] == 'dfs'].groupby('map')
+    df_bfs = df[df['algorithm'] == 'bfs'].groupby('map')
+
+    mean_dfs = df_dfs.get_group(map_name)['execution_time_ms'].mean()
+    mean_bfs = df_bfs.get_group(map_name)['execution_time_ms'].mean()
+
+    plt.bar(['bfs', 'dfs'], [mean_bfs, mean_dfs], color=['blue', 'orange'])
+    plt.ylim(bottom=0)
+    plt.ylabel('Tiempo de Ejecucion (ms)')
+    plt.title(f'Tiempo de Ejecucion para el Mapa {map_name[:-4]}')
+    #plt.savefig(f'{graphs_folder}average_time_{map_name[:-4]}.png')
+    plt.show()
+
+
+def greedy_vs_astar_average_time(map_name):
     df = pd.read_csv(filename)
     df['execution_time'] = pd.to_numeric(df['execution_time'])
     df['execution_time_ms'] = df['execution_time'] 
@@ -108,7 +127,7 @@ def average_time(map_name):
     std_greedy = df_greedy.get_group(map_name)['execution_time_ms'].std()
     mean_a_star = df_a_star.get_group(map_name)['execution_time_ms'].mean()
     std_a_star = df_a_star.get_group(map_name)['execution_time_ms'].std()
-
+   
     print(f"Greedy: {mean_greedy} std: {std_greedy}")
 
     plt.bar(['Greedy', 'A*'], [mean_greedy, mean_a_star], color=['blue', 'orange'])
@@ -119,7 +138,8 @@ def average_time(map_name):
     #plt.savefig(f'{graphs_folder}average_time_{map_name[:-4]}.png')
     plt.show()
     
-def average_frontier_nodes(map_name):
+
+def greedy_vs_astar_average_frontier_nodes(map_name):
     df = pd.read_csv(filename)
     df['execution_time'] = pd.to_numeric(df['execution_time'])
     df['execution_time_ms'] = df['execution_time'] 
@@ -140,7 +160,46 @@ def average_frontier_nodes(map_name):
     #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
     plt.show()
 
-def average_explored_nodes(map_name):
+
+def bfs_vs_dfs_average_frontier_nodes(map_name):
+    df = pd.read_csv(filename)
+    df['execution_time'] = pd.to_numeric(df['execution_time'])
+    df['execution_time_ms'] = df['execution_time'] 
+
+    df_dfs = df[df['algorithm'] == 'dfs'].groupby('map')
+    df_bfs = df[df['algorithm'] == 'bfs'].groupby('map')
+
+    mean_dfs = df_dfs.get_group(map_name)['frontier'].mean()
+    mean_bfs = df_bfs.get_group(map_name)['frontier'].mean()
+
+    plt.bar(['bfs', 'dfs'], [mean_bfs, mean_dfs], color=['blue', 'orange'])
+    plt.ylim(bottom=0)
+    plt.ylabel('Nodos Frontera')
+    plt.title(f'Cantidad Promedio de Nodos Frontera para el Mapa {map_name[:-4]}')
+    #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
+    plt.show()
+
+
+def bfs_vs_dfs_average_explored_nodes(map_name):
+    df = pd.read_csv(filename)
+    df['execution_time'] = pd.to_numeric(df['execution_time'])
+    df['execution_time_ms'] = df['execution_time'] 
+
+    df_dfs = df[df['algorithm'] == 'dfs'].groupby('map')
+    df_bfs = df[df['algorithm'] == 'bfs'].groupby('map')
+
+    mean_dfs = df_dfs.get_group(map_name)['frontier'].mean()
+    mean_bfs = df_bfs.get_group(map_name)['frontier'].mean()
+
+    plt.bar(['bfs', 'dfs'], [mean_bfs, mean_dfs], color=['blue', 'orange'])
+    plt.ylim(bottom=0)
+    plt.ylabel('Nodos Explorados')
+    plt.title(f'Cantidad Promedio de Nodos Explorados para el Mapa {map_name[:-4]}')
+    #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
+    plt.show()
+
+
+def greedy_vs_astar_average_explored_nodes(map_name):
     df = pd.read_csv(filename)
     df['execution_time'] = pd.to_numeric(df['execution_time'])
     df['execution_time_ms'] = df['execution_time'] 
@@ -160,6 +219,69 @@ def average_explored_nodes(map_name):
     plt.title(f'Cantidad Promedio de Nodos Explorados para el Mapa {map_name[:-4]}')
     #plt.savefig(f'{graphs_folder}average_frontier_nodes_{map_name[:-4]}.png')
     plt.show()
+
+
+def bfs_vs_dfs_frontier_nodes_all():
+    df = pd.read_csv(filename)
+    df['frontier'] = pd.to_numeric(df['frontier'])
+
+    df_dfs_mean = df[df['algorithm'] == 'dfs'].groupby('map')['frontier'].mean()
+    df_bfs_mean = df[df['algorithm'] == 'bfs'].groupby('map')['frontier'].mean()
+
+    maps = df['map'].unique()
+
+    dfs_times = [df_dfs_mean.get(map_name, 0) for map_name in maps]
+    bfs_times = [df_bfs_mean.get(map_name, 0) for map_name in maps]
+
+    x = np.arange(len(maps)) 
+    width = 0.4  # Bar width
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.bar(x - width/2, bfs_times, width, label='BFS', color='blue')
+    ax.bar(x + width/2, dfs_times, width, label='DFS', color='orange')
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(maps, rotation=45)
+    ax.set_ylabel('Nodos Frontera')
+    ax.set_title('Cantidad Promedio de Nodos Frontera para Cada Mapa')
+    ax.legend()
+    plt.ylim(bottom=0)
+    plt.tight_layout()
+    #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
+    plt.show()
+
+
+def bfs_vs_dfs_exp_nodes_all():
+    df = pd.read_csv(filename)
+    df['explored'] = pd.to_numeric(df['explored'])
+
+    df_dfs_mean = df[df['algorithm'] == 'dfs'].groupby('map')['explored'].mean()
+    df_bfs_mean = df[df['algorithm'] == 'bfs'].groupby('map')['explored'].mean()
+
+    maps = df['map'].unique()
+
+    dfs_times = [df_dfs_mean.get(map_name, 0) for map_name in maps]
+    bfs_times = [df_bfs_mean.get(map_name, 0) for map_name in maps]
+
+    x = np.arange(len(maps)) 
+    width = 0.4  # Bar width
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.bar(x - width/2, bfs_times, width, label='BFS', color='blue')
+    ax.bar(x + width/2, dfs_times, width, label='DFS', color='orange')
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(maps, rotation=45)
+    ax.set_ylabel('Nodos Explorados')
+    ax.set_title('Cantidad Promedio de Nodos Explorados para Cada Mapa')
+    ax.legend()
+    plt.ylim(bottom=0)
+    plt.tight_layout()
+    #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
+    plt.show()
+
 
 def greedy_vs_a_star_frontier_nodes_all():
     df = pd.read_csv(filename)
@@ -182,8 +304,8 @@ def greedy_vs_a_star_frontier_nodes_all():
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    bars_greedy = ax.bar(x - width/2, greedy_times, width, label='Greedy', color='blue')
-    bars_a_star = ax.bar(x + width/2, a_star_times, width, label='A*', color='orange')
+    ax.bar(x - width/2, greedy_times, width, label='Greedy', color='blue')
+    ax.bar(x + width/2, a_star_times, width, label='A*', color='orange')
 
     # Center the error bar
     ax.errorbar(x - width/2, greedy_times, yerr=greedy_std_dev, fmt='o', color='black', capsize=5)
@@ -238,44 +360,36 @@ def greedy_vs_a_star_exp_nodes_all():
     #plt.savefig(f'{graphs_folder}frontier_nodes_all_maps.png')
     plt.show()
 
-# Greedy vs A* comparando distintos mapas 
-# def greedy_vs_a_star_time():
-#     df = pd.read_csv(filename)
-#     df['execution_time'] = pd.to_numeric(df['execution_time'])
-#     df['execution_time_ms'] = df['execution_time'] 
 
-#     df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['execution_time_ms'].mean()
-#     df_greedy_std = df[df['algorithm'] == 'Greedy'].groupby('map')['execution_time_ms'].std()
-#     df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['execution_time_ms'].mean()
-#     df_a_star_std = df[df['algorithm'] == 'A*'].groupby('map')['execution_time_ms'].std()
+def path_len_bfs_vs_a_dfs():
+    df = pd.read_csv(filename)
 
-#     maps = df['map'].unique()
+    df_bfs_mean = df[df['algorithm'] == 'bfs'].groupby('map')['path_length'].mean()
+    df_dfs_mean = df[df['algorithm'] == 'dfs'].groupby('map')['path_length'].mean()
 
-#     greedy_times = [df_greedy_mean.get(map_name, 0) for map_name in maps]
-#     greedy_std_dev = [df_greedy_std.get(map_name, 0) for map_name in maps]
-#     a_star_times = [df_a_star_mean.get(map_name, 0) for map_name in maps]
-#     a_star_std_dev = [df_a_star_std.get(map_name, 0) for map_name in maps]
+    maps = df['map'].unique()
 
-#     x = np.arange(len(maps)) 
-#     width = 0.4  # Bar width
+    dfs_path = [df_dfs_mean.get(map_name, 0) for map_name in maps]
+    bfs_path = [df_bfs_mean.get(map_name, 0) for map_name in maps]
 
-#     fig, ax = plt.subplots(figsize=(10, 6))
+    x = np.arange(len(maps))
+    width = 0.4  # Bar width
 
-#     bars_greedy = ax.bar(x - width/2, greedy_times, width, label='Greedy', color='blue')
-#     bars_a_star = ax.bar(x + width/2, a_star_times, width, label='A*', color='orange')
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-#     # Center the error bar
-#     ax.errorbar(x - width/2, greedy_times, yerr=greedy_std_dev, fmt='o', color='black', capsize=5)
-#     ax.errorbar(x + width/2, a_star_times, yerr=a_star_std_dev, fmt='o', color='black', capsize=5)
+    ax.bar(x - width/2, bfs_path, width, label='BFS', color='blue')
+    ax.bar(x + width/2, dfs_path, width, label='DFS', color='orange')
 
-#     ax.set_xticks(x)
-#     ax.set_xticklabels(maps, rotation=45)
-#     ax.set_ylabel('Tiempo de Ejecucion (ms)')
-#     ax.set_title('Tiempo de Ejecucion Promedio para cada Mapa')
-#     ax.legend()
-#     plt.tight_layout()
-#     #plt.savefig(f'{graphs_folder}execution_time_maps.png')
-#     plt.show()
+    ax.set_xticks(x)
+    ax.set_xticklabels(maps, rotation=45)
+    ax.set_ylabel('Longitud del camino')
+    ax.set_title('Longitud del Camino para cada Mapa')
+    ax.legend()
+    plt.ylim(bottom=0)
+    plt.tight_layout()
+    #plt.savefig(f'{graphs_folder}path_len_maps.png')
+    plt.show()
+
 
 def path_len_greed_vs_a_star():
     df = pd.read_csv(filename)
@@ -327,30 +441,36 @@ def avg_running_time():
     print(f'Tiempo de ejecucion promedio para A*: {a_star_time} error: {df_a_star_mean.std()}')
 
 def main():
-    run_a_10_times()
-    run_g_10_times()
-    run_a_10_times()
-    run_g_10_times()
-    run_a_10_times()
-    run_g_10_times()
-    run_uninformative_search("dfs")
-    run_uninformative_search("bfs")
+    #run_a_10_times()
+    #run_g_10_times()
+    #run_uninformative_search("dfs")
+    #run_uninformative_search("bfs")
 
-    average_time('Dificil.txt')
-    average_frontier_nodes('Dificil.txt')
-    average_explored_nodes('Dificil.txt')
+    bfs_vs_dfs_average_time('Medio.txt')
+    bfs_vs_dfs_average_frontier_nodes('Medio.txt')
+    bfs_vs_dfs_average_explored_nodes('Medio.txt')
+
+    bfs_vs_dfs_exp_nodes_all()
+    bfs_vs_dfs_frontier_nodes_all()
+    path_len_bfs_vs_a_dfs()
+
+
+    greedy_vs_astar_average_time('Dificil.txt')
+    greedy_vs_astar_average_frontier_nodes('Dificil.txt')
+    greedy_vs_astar_average_explored_nodes('Dificil.txt')
 
     greedy_vs_a_star_exp_nodes_all()
     greedy_vs_a_star_frontier_nodes_all()
 
     path_len_greed_vs_a_star()
-    avg_running_time()
 
     exp_nodes_by_heuristic('Medio.txt', 'Greedy')
     exp_nodes_by_heuristic('Medio.txt', 'A*')
 
     optimal_path_by_heuristic('Medio.txt', 'Greedy')
     optimal_path_by_heuristic('Medio.txt', 'A*')
+
+    avg_running_time()
 
 if __name__ == "__main__":
     main()

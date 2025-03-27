@@ -126,7 +126,7 @@ def uninformed_search_algorithm(map_name, goals, walls, initial_state, is_goal, 
         if is_goal(current_node.state, goals):
             end_time = time.time()
             write_output(method, "Éxito", current_node.get_path(), len(explored), len(frontier)+len(explored), (end_time - start_time) * 1000, current_node.cost, True)
-            write_output_for_visualization(map_name,method, (end_time - start_time) * 1000, len(explored), len(explored) + len(frontier), iteration)
+            write_output_for_visualization(map_name,method, (end_time - start_time) * 1000, len(explored), len(explored) + len(frontier), current_node.cost)
             return current_node.get_moves()
 
         # 14: n → Exp
