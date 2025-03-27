@@ -40,7 +40,7 @@ class Node:
             current_node= current_node.parent
         return list(reversed(path))          
 
-def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sorting_criteria=None, method="bfs"):
+def uninformed_search_algorithm(goals, walls, initial_state, is_goal, get_children, sorting_criteria=None, method="bfs"):
     start_time = time.time()
     # 4: Crear Tr, Fr, Exp vacíos
     # Tr se representa implícitamente mediante los enlaces padre en los nodos
@@ -67,17 +67,17 @@ def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sort
 
         iteration = iteration + 1
         # 8-10: if n Goal then return solución
-        if is_goal(current_node.state, game):
+        if is_goal(current_node.state, goals):
             end_time = time.time()
             write_output(method, "Éxito", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost, True)
-            write_output_for_visualization(method, current_node)
+            #write_output_for_visualization(method, )
             return current_node.get_moves()
 
         # 14: n → Exp
         explored.append(current_node.state)
 
         # 11-13: Expandir el nodo n, sucesores → Fr, Tr
-        for move, child_state, cost, boxed_moved, depth in get_children(current_node, game):
+        for move, child_state, cost, boxed_moved, depth in get_children(current_node, walls):
 
             # Verificar si el estado ya fue explorado
             if child_state in explored:
@@ -107,7 +107,7 @@ def uninformed_search_algorithm(game, initial_state, is_goal, get_children, sort
     write_output(method, "Fracaso", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost, True)
     return None
 
-def get_children(current_node, game):
+def get_children(current_node, walls):
     # starts where the player is located in the current state
     starting_point = current_node.state.player
     last_state = current_node.state
@@ -116,12 +116,12 @@ def get_children(current_node, game):
 
     for direction in directions:
         current_position = [starting_point[0] + direction[0], starting_point[1] + direction[1]]
-        if check_limits([starting_point[0] + direction[0], starting_point[1] + direction[1]], game, last_state, direction):
+        if check_limits([starting_point[0] + direction[0], starting_point[1] + direction[1]], walls, last_state, direction):
             new_boxes = last_state.boxes.copy()
             boxed_moved = False
             if current_position in last_state.boxes:
                 box = ([current_position[0] + direction[0], current_position[1] + direction[1]])
-                if not check_limits(box, game, last_state, direction):
+                if not check_limits(box, walls, last_state, direction):
                     continue
                 boxed_moved = True
                 new_boxes.remove(current_position)
@@ -134,16 +134,16 @@ def get_children(current_node, game):
 
     return result
 
-def is_goal(state, game):
+def is_goal(state, goals):
     for box_position in state.boxes:
-        if box_position not in game.goals:
+        if box_position not in goals:
             return False
 
     return True
 
 # making sure that the next position is not occupied by a wall or a stucked box
-def check_limits(coordinates, game, last_state, direction):
-    if coordinates in game.walls:
+def check_limits(coordinates, walls, last_state, direction):
+    if coordinates in walls:
         return False
     if coordinates in last_state.boxes:
         if is_blocked_box_for_direction(coordinates, last_state, direction):
@@ -178,6 +178,10 @@ def load_all_playable_positions_for_boxes(goals, walls):
             [0, 1],   # Right to Left
             [0, -1]   # Left to Right
         ]
+
+        wall_list = []
+        for wall in walls:
+            wall_list.append([wall[0],wall[1]])
         
         # Breadth-first search to pull the box
         while frontier:
@@ -201,8 +205,8 @@ def load_all_playable_positions_for_boxes(goals, walls):
                 # 1. Box position is not a wall
                 # 2. Player position is not a wall
                 # 3. Box position hasn't been explored before
-                if ((box_position[0], box_position[1]) not in walls and 
-                    player_position not in walls and 
+                if (box_position not in wall_list and
+                    player_position not in wall_list and 
                     box_position not in explored):
                     
                     # Mark this position as explored and add to frontier
