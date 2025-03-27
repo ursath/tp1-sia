@@ -343,8 +343,8 @@ def greedy_vs_a_star_exp_nodes_all():
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    bars_greedy = ax.bar(x - width/2, greedy_times, width, label='Greedy', color='blue')
-    bars_a_star = ax.bar(x + width/2, a_star_times, width, label='A*', color='orange')
+    ax.bar(x - width/2, greedy_times, width, label='Greedy', color='blue')
+    ax.bar(x + width/2, a_star_times, width, label='A*', color='orange')
 
     # Center the error bar
     ax.errorbar(x - width/2, greedy_times, yerr=greedy_std_dev, fmt='o', color='black', capsize=5)
@@ -411,8 +411,8 @@ def path_len_greed_vs_a_star():
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    bars_greedy = ax.bar(x - width/2, greedy_path, width, label='Greedy', color='blue')
-    bars_a_star = ax.bar(x + width/2, a_star_path, width, label='A*', color='orange')
+    ax.bar(x - width/2, greedy_path, width, label='Greedy', color='blue')
+    ax.bar(x + width/2, a_star_path, width, label='A*', color='orange')
 
     # Center the error bar
     ax.errorbar(x - width/2, greedy_path, yerr=greedy_std_dev, fmt='o', color='black', capsize=5)
@@ -426,6 +426,78 @@ def path_len_greed_vs_a_star():
     plt.ylim(bottom=0)
     plt.tight_layout()
     #plt.savefig(f'{graphs_folder}path_len_maps.png')
+    plt.show()
+
+
+def path_len_all(map):
+    df = pd.read_csv(filename)
+
+    df_greedy_mean = df[df['algorithm'] == 'Greedy'].groupby('map')['path_length'].mean()
+    df_a_star_mean = df[df['algorithm'] == 'A*'].groupby('map')['path_length'].mean()
+    df_bfs_mean = df[df['algorithm'] == 'bfs'].groupby('map')['path_length'].mean()
+    df_dfs_mean = df[df['algorithm'] == 'dfs'].groupby('map')['path_length'].mean()
+
+    maps = df['map'].unique()
+
+    greedy_path = [df_greedy_mean.get(map_name, 0) for map_name in maps]
+    a_star_path = [df_a_star_mean.get(map_name, 0) for map_name in maps]
+    bfs_path = [df_bfs_mean.get(map_name, 0) for map_name in maps]
+    dfs_path = [df_dfs_mean.get(map_name, 0) for map_name in maps]
+
+    x = np.arange(len(maps))
+    width = 0.2  # Bar width
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.bar(x - 1.5 * width, greedy_path, width, label='Greedy', color='blue')
+    ax.bar(x - 0.5 * width, a_star_path, width, label='A*', color='orange')
+    ax.bar(x + 0.5 * width, bfs_path, width, label='BFS', color='green')
+    ax.bar(x + 1.5 * width, dfs_path, width, label='DFS', color='red')
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(maps, rotation=45)
+    ax.set_ylabel('Longitud del camino')
+    ax.set_title('Longitud del Camino para cada Mapa')
+    ax.legend()
+    plt.ylim(bottom=0)
+    plt.tight_layout()
+    #plt.savefig(f'{graphs_folder}path_len_maps.png')
+    plt.show()
+
+def average_explored_vs_frontier_nodes(map_name):
+    df = pd.read_csv(filename)
+    df['execution_time'] = pd.to_numeric(df['execution_time'])
+    df['execution_time_ms'] = df['execution_time'] 
+
+    df_greedy = df[df['algorithm'] == 'Greedy'].groupby('map')
+    df_a_star = df[df['algorithm'] == 'A*'].groupby('map')
+    df_dfs = df[df['algorithm'] == 'dfs'].groupby('map')
+    df_bfs = df[df['algorithm'] == 'bfs'].groupby('map')
+
+    # Promedios de la frontera
+    mean_greedy_frontier = df_greedy.get_group(map_name)['frontier'].mean()
+    mean_a_star_frontier = df_a_star.get_group(map_name)['frontier'].mean()
+    mean_dfs_frontier = df_dfs.get_group(map_name)['frontier'].mean()
+    mean_bfs_frontier = df_bfs.get_group(map_name)['frontier'].mean()
+
+    # Promedios de los nodos explorados
+    mean_greedy_explored = df_greedy.get_group(map_name)['explored'].mean()
+    mean_a_star_explored = df_a_star.get_group(map_name)['explored'].mean()
+    mean_dfs_explored = df_dfs.get_group(map_name)['explored'].mean()
+    mean_bfs_explored = df_bfs.get_group(map_name)['explored'].mean()
+
+    # Cálculo de porcentajes
+    perc_greedy = mean_greedy_explored / mean_greedy_frontier
+    perc_a_star = mean_a_star_explored / mean_a_star_frontier
+    perc_dfs = mean_dfs_explored / mean_dfs_frontier
+    perc_bfs = mean_bfs_explored / mean_bfs_frontier
+
+    # Gráfico
+    plt.bar(['Greedy', 'A*', 'DFS', 'BFS'], [perc_greedy, perc_a_star, perc_dfs, perc_bfs], 
+            color=['blue', 'orange', 'red', 'green'])
+    plt.ylim(bottom=0)
+    plt.ylabel('nodos explorados / frontera')
+    plt.title(f'Proporción de nodos explorados de la Frontera para el Mapa {map_name[:-4]}')
     plt.show()
 
 def avg_running_time():
@@ -446,29 +518,36 @@ def main():
     #run_uninformative_search("dfs")
     #run_uninformative_search("bfs")
 
-    bfs_vs_dfs_average_time('Medio.txt')
-    bfs_vs_dfs_average_frontier_nodes('Medio.txt')
-    bfs_vs_dfs_average_explored_nodes('Medio.txt')
+    # Gráficos de comparación entre bfs y dfs
+    #bfs_vs_dfs_average_time('Medio.txt')
+    #bfs_vs_dfs_average_frontier_nodes('Medio.txt')
+    #bfs_vs_dfs_average_explored_nodes('Medio.txt')
 
-    bfs_vs_dfs_exp_nodes_all()
-    bfs_vs_dfs_frontier_nodes_all()
-    path_len_bfs_vs_a_dfs()
+    #bfs_vs_dfs_exp_nodes_all()
+    #bfs_vs_dfs_frontier_nodes_all()
 
+    #path_len_bfs_vs_a_dfs()
 
-    greedy_vs_astar_average_time('Dificil.txt')
-    greedy_vs_astar_average_frontier_nodes('Dificil.txt')
-    greedy_vs_astar_average_explored_nodes('Dificil.txt')
+    # Gráficos de comparación entre greedy y a*
+    #greedy_vs_astar_average_time('Dificil.txt')
+    #greedy_vs_astar_average_frontier_nodes('Dificil.txt')
+    #greedy_vs_astar_average_explored_nodes('Dificil.txt')
 
-    greedy_vs_a_star_exp_nodes_all()
-    greedy_vs_a_star_frontier_nodes_all()
+    #greedy_vs_a_star_exp_nodes_all()
+    #greedy_vs_a_star_frontier_nodes_all()
 
-    path_len_greed_vs_a_star()
+    #path_len_greed_vs_a_star()
 
-    exp_nodes_by_heuristic('Medio.txt', 'Greedy')
-    exp_nodes_by_heuristic('Medio.txt', 'A*')
+    # Gráficos de comparación entre heurísticas
+    #exp_nodes_by_heuristic('Medio.txt', 'Greedy')
+    #exp_nodes_by_heuristic('Medio.txt', 'A*')
 
-    optimal_path_by_heuristic('Medio.txt', 'Greedy')
-    optimal_path_by_heuristic('Medio.txt', 'A*')
+    #optimal_path_by_heuristic('Medio.txt', 'Greedy')
+    #optimal_path_by_heuristic('Medio.txt', 'A*')
+
+    # Gráficos de comparación entre los 4 métodos: bfs, dfs, greedy, a*
+    # path_len_all('Medio.txt')
+    average_explored_vs_frontier_nodes('Medio.txt')
 
     avg_running_time()
 
