@@ -25,13 +25,13 @@ class Greedy:
         answer['execution_time'] = time.time()  # To substract from the end time
         answer['frontier'] = 0
 
-        if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
-            # ManhattanDistance and ManhattanImproved only take boxes
-            h_n = self.heuristics.get(self.initial_state.boxes)
-        elif isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
+        if isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
             h_n = self.heuristics.get(self.initial_state.boxes, self.valid_box_positions)
         elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
             h_n = self.heuristics.get(self.initial_state.boxes, self.initial_state.player, self.valid_box_positions)
+        elif isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
+            # ManhattanDistance and ManhattanImproved only take boxes
+            h_n = self.heuristics.get(self.initial_state.boxes)
         else:
             # PlayerDistance or CombinedHeuristic take boxes and player
             h_n = self.heuristics.get(self.initial_state.boxes, self.initial_state.player)
@@ -62,13 +62,13 @@ class Greedy:
                 if new_state is None or new_state in self.explored:
                     continue
 
-                if isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
-                    # ManhattanDistance and ManhattanImproved only take boxes
-                    h_n = self.heuristics.get(new_state.boxes)
-                elif isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
+                if isinstance(self.heuristics, (ManhattanDistanceWithDeadlockDetection)):
                     h_n = self.heuristics.get(new_state.boxes, self.valid_box_positions)
                 elif isinstance(self.heuristics, (CombinedHeuristicWithDeadlockDetection)):
                     h_n = self.heuristics.get(new_state.boxes, new_state.player, self.valid_box_positions)
+                elif isinstance(self.heuristics, (ManhattanDistance, ManhattanImproved)):
+                    # ManhattanDistance and ManhattanImproved only take boxes
+                    h_n = self.heuristics.get(new_state.boxes) 
                 else:
                     # PlayerDistance or CombinedHeuristic take boxes and player
                     h_n = self.heuristics.get(new_state.boxes, new_state.player)
@@ -189,6 +189,8 @@ def run_g_10_times():
         manhattan_improved = ManhattanImproved(map.targets)
         player_distance = PlayerDistance(map.targets)
         combined_heuristic = CombinedHeuristic(map.targets)
+        manhattan_distance_deadlock = ManhattanDistanceWithDeadlockDetection(map.targets)
+        combined_heuristic_deadlock = CombinedHeuristicWithDeadlockDetection(map.targets)
         initial_state = State(map.boxes, map.player, map.targets)
         
         print("Greedy - Manhattan Distance")
@@ -210,6 +212,17 @@ def run_g_10_times():
         greedy_combined = Greedy(initial_state, combined_heuristic, map, valid_box_positions)
         answer = execute_g(greedy_combined)
         write_output("Greedy_combined", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+
+        print("Greedy - Manhattan With Deadlock Detection")
+        greedy_manhattan_deadlock = Greedy(initial_state, manhattan_distance_deadlock, map, valid_box_positions)
+        answer = execute_g(greedy_manhattan_deadlock)
+        write_output("Greedy_manhattan_with_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+
+        print("Greedy - Combined With Deadlock Detection")
+        greedy_combined_deadlock = Greedy(initial_state, combined_heuristic_deadlock, map, valid_box_positions)
+        answer = execute_g(greedy_combined_deadlock)
+        write_output("Greedy_combined_with_deadlock", answer["result"], answer["path"], answer["explored"], answer["frontier"], answer["execution_time"], len(answer["path"]), False)
+
 
 def main():
     run_g_10_times()

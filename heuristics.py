@@ -21,7 +21,7 @@ class ManhattanDistanceWithDeadlockDetection(ManhattanDistance):
     def get(self, boxes, valid_boxes):
         if check_simple_deadlock_for_boxes(boxes, valid_boxes):
             return float('inf')
-        return super.get(boxes)
+        return super().get(boxes)
 
 # Mejora de la heurística de Manhattan: no permite que dos cajas tengan un mismo objetivo
 # No considera obstaculos
