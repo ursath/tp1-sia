@@ -1,4 +1,6 @@
 import time
+from a_star import MapInfo
+import os
 from generate_outputs import write_output, write_output_for_visualization
 
 class Uninformed_State:
@@ -40,7 +42,7 @@ class Node:
             current_node= current_node.parent
         return list(reversed(path))          
 
-def uninformed_search_algorithm(goals, walls, initial_state, is_goal, get_children, sorting_criteria=None, method="bfs"):
+def uninformed_search_algorithm(map_name, goals, walls, initial_state, is_goal, get_children, sorting_criteria=None, method="bfs"):
     start_time = time.time()
     # 4: Crear Tr, Fr, Exp vacíos
     # Tr se representa implícitamente mediante los enlaces padre en los nodos
@@ -70,7 +72,7 @@ def uninformed_search_algorithm(goals, walls, initial_state, is_goal, get_childr
         if is_goal(current_node.state, goals):
             end_time = time.time()
             write_output(method, "Éxito", current_node.get_path(), iteration, len(frontier)+iteration, (end_time - start_time) * 1000, current_node.cost, True)
-            #write_output_for_visualization(method, )
+            write_output_for_visualization(map_name,method, (end_time - start_time) * 1000, explored, frontier, iteration)
             return current_node.get_moves()
 
         # 14: n → Exp
@@ -159,6 +161,22 @@ def is_blocked_box_for_direction(coordinates, last_state, direction):
         return True
     return False
 
+def load_map(map_file):
+    with open(map_file, "r") as f:
+        return [list(line.strip()) for line in f.readlines()]
+
+def run_uninformative_search(method="bfs"):
+    if 'stats.csv' not in os.listdir('data'):
+        file = open('data/stats.csv', 'w')
+        file.write('map,algorithm,heuristic,execution_time,explored,frontier,path_length\n')
+        file.close()
+        maps = []
+
+    for m in os.listdir('maps'):
+        maps.append(MapInfo(load_map(f"maps/{m}"), m))
+        map = MapInfo(load_map(f"maps/{m}"), m)
+        initial_state = Uninformed_State(map.boxes, map.player)
+        uninformed_search_algorithm(map.targets, map.walls, initial_state, is_goal, get_children, None, method)
 
 # For deadlocks -> move to heuristics
 def load_all_playable_positions_for_boxes(goals, walls):
