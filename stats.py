@@ -1,6 +1,6 @@
 from a_star import run_a_10_times
 from greedy import run_g_10_times
-from game_solver import run_uninformative_search
+from uninformative_searchs import run_uninformative_search
 from heuristics import ManhattanDistance, ManhattanImproved, PlayerDistance, CombinedHeuristic, ManhattanDistanceWithDeadlockDetection, CombinedHeuristicWithDeadlockDetection
 import os
 from matplotlib import pyplot as plt

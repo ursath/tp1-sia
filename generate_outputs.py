@@ -1,4 +1,4 @@
-
+import os
 
 def write_output(method, result, path, iteration, frontier, time, cost, is_uninformed):
     with open(f'{method}_results.txt', 'w') as file:
@@ -33,5 +33,10 @@ def write_output(method, result, path, iteration, frontier, time, cost, is_uninf
         file.write(f"Tiempo de procesamiento: {time} ms\n")
 
 def write_output_for_visualization(map, method, execution_time, explored, frontier, steps):
-    with open(f'{method}_for_map_{map}.csv', 'w') as file:
+    if 'stats.csv' not in os.listdir('data'):
+        file = open('data/stats.csv', 'w')
+        file.write('map,algorithm,heuristic,execution_time,explored,frontier,path_length\n')
+        file.close()
+
+    with open(f'./data/stats.csv', 'a') as file:
         file.write(f'{map},{method},None,{execution_time},{explored},{frontier},{steps}\n')

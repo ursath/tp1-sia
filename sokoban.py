@@ -1,6 +1,6 @@
 import os
 import arcade
-from game_solver import *
+from uninformative_searchs import *
 from deadlocks import load_all_playable_positions_for_boxes
 from greedy import get_greedy
 from a_star import get_astar
@@ -115,7 +115,7 @@ if __name__ == "__main__":
     map_name = os.path.splitext(os.path.basename(data_map))[0]
     game = SokobanGame(data_map, [])
     valid_box_positions = load_all_playable_positions_for_boxes(game.goals, game.walls)
-    moves = uninformed_search_algorithm(map_name,game.goals,game.walls, game.current_state, is_goal_array, get_children_array, None)
+    moves = uninformed_search_algorithm(map_name,game.goals,game.walls, game.current_state, is_goal_array, get_children_array, None, "dfs")
     game.moves = moves
     #moves = get_greedy(data_map, "combined", game)
     #moves = get_astar(data_map, "manhattan_with_corral_deadlock_detection", valid_box_positions)

@@ -1,8 +1,8 @@
-from game_solver import Uninformed_State
-from game_solver import Node
-from game_solver import uninformed_search_algorithm
-from game_solver import is_goal
-from game_solver import get_children
+from uninformative_searchs import Uninformed_State
+from uninformative_searchs import Node
+from uninformative_searchs import uninformed_search_algorithm
+from uninformative_searchs import is_goal
+from uninformative_searchs import get_children
 
 #from game_solver import *
 from functools import partial
