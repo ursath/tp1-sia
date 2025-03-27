@@ -80,11 +80,11 @@ def optimal_path_by_heuristic(map_name):
     path_combined = df_combined['path_length'].mean()
     path_combined_avg = df_combined['path_length'].std()
 
-    man_dl_path = df_manhattan_dl['path_lenght'].mean()
-    man_dl_path_std = df_manhattan_dl['path_lenght'].std()
+    man_dl_path = df_manhattan_dl['path_length'].mean()
+    man_dl_path_std = df_manhattan_dl['path_length'].std()
 
-    combined_dl_path = df_combined_dl['path_lenght'].mean()
-    combined_dl_path_std = df_combined_dl['path_lenght'].std()
+    combined_dl_path = df_combined_dl['path_length'].mean()
+    combined_dl_path_std = df_combined_dl['path_length'].std()
 
 
     plt.bar(['Distancia Manhattan', 'Manhattan Mejorada', 'Distancia del Jugador', 'Heuristica Combinada', 'Manhattan (Deadlock)', 'Combinada (Deadlock)'], [path_manhattan, path_manhattan_improved, path_player_distance, path_combined, man_dl_path, combined_dl_path], color=['blue', 'orange', 'green', 'red'])
